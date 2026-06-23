@@ -1,0 +1,129 @@
+<div class="scn-root">
+  <ngx-spinner bdColor="rgba(11,14,20,0.92)" size="medium" color="#00D9A3"
+               type="ball-scale-multiple" [fullScreen]="false">
+    <p class="scn-spinner-text">Processing...</p>
+  </ngx-spinner>
+
+  <!-- ══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+  <div class="scn-topbar">
+    <button class="scn-back-btn" (click)="back()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      Back
+    </button>
+    <div class="scn-topbar-title">
+      <span class="scn-topbar-eyebrow">Floor Station</span>
+      <h1 class="scn-topbar-heading">Scan &amp; Move</h1>
+    </div>
+    <div class="scn-shift-counter">
+      <span class="scn-shift-counter-value">{{ scannedCount }}</span>
+      <span class="scn-shift-counter-label">scanned this session</span>
+    </div>
+  </div>
+
+  <div class="scn-body">
+
+    <!-- ══════════════════════════════════════════
+         STAGE SELECTOR — which stage is this station
+    ═══════════════════════════════════════════ -->
+    <div class="scn-stage-row">
+      <span class="scn-stage-row-label">Receiving into</span>
+      <div class="scn-stage-pills">
+        <button *ngFor="let stage of stages"
+                class="scn-stage-pill"
+                [class.scn-stage-pill--active]="targetStageId === stage.id"
+                [style.--pill-color]="stage.color"
+                (click)="selectStage(stage.id)">
+          {{ stage.stageName }}
+        </button>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SCAN INPUT — always focused, scanner-ready
+    ═══════════════════════════════════════════ -->
+    <div class="scn-scan-zone" [class.scn-scan-zone--success]="lastResult === 'success'"
+         [class.scn-scan-zone--error]="lastResult === 'error'">
+      <div class="scn-scan-icon">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+          <path d="M3 7V5a2 2 0 012-2h2"></path>
+          <path d="M17 3h2a2 2 0 012 2v2"></path>
+          <path d="M21 17v2a2 2 0 01-2 2h-2"></path>
+          <path d="M7 21H5a2 2 0 01-2-2v-2"></path>
+          <line x1="7" y1="12" x2="17" y2="12"></line>
+        </svg>
+      </div>
+      <input #scanInput
+             type="text"
+             class="scn-scan-input"
+             [(ngModel)]="scanValue"
+             (keyup.enter)="processScan()"
+             (blur)="refocus()"
+             placeholder="Scan bundle barcode..."
+             autocomplete="off"
+             spellcheck="false">
+      <div class="scn-scan-hint">Scanner-ready — point and trigger</div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         LAST SCAN RESULT — large feedback card
+    ═══════════════════════════════════════════ -->
+    <div class="scn-result-card" *ngIf="lastScanned" [class.scn-result-card--error]="lastResult === 'error'">
+      <div class="scn-result-icon" *ngIf="lastResult === 'success'">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#00D9A3" stroke-width="2.5">
+          <polyline points="20 6 9 17 4 12"></polyline>
+        </svg>
+      </div>
+      <div class="scn-result-icon" *ngIf="lastResult === 'error'">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#FF5470" stroke-width="2.5">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+      </div>
+
+      <div class="scn-result-body" *ngIf="lastResult === 'success'">
+        <div class="scn-result-row">
+          <span class="scn-result-bundle">Bundle #{{ lastScanned.bundleNo }}</span>
+          <span class="scn-result-size">{{ lastScanned.sizeName }}</span>
+        </div>
+        <div class="scn-result-meta">
+          {{ lastScanned.sectionName }} &middot; {{ lastScanned.totalQty }} pcs
+        </div>
+        <div class="scn-result-arrow">
+          moved to
+          <span class="scn-result-stage" [style.color]="lastScanned.toStageColor">
+            {{ lastScanned.toStage }}
+          </span>
+        </div>
+      </div>
+
+      <div class="scn-result-body" *ngIf="lastResult === 'error'">
+        <div class="scn-result-row">
+          <span class="scn-result-error-text">{{ lastErrorMessage }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         SESSION LOG — recent scans this session
+    ═══════════════════════════════════════════ -->
+    <div class="scn-log-section" *ngIf="sessionLog.length > 0">
+      <div class="scn-log-header">Session Log</div>
+      <div class="scn-log-list">
+        <div class="scn-log-row" *ngFor="let entry of sessionLog" [class.scn-log-row--error]="!entry.success">
+          <span class="scn-log-time">{{ entry.time }}</span>
+          <span class="scn-log-bundle">B#{{ entry.bundleNo || '-' }}</span>
+          <span class="scn-log-detail">{{ entry.detail }}</span>
+          <span class="scn-log-status" [class.scn-log-status--ok]="entry.success">
+            {{ entry.success ? '✓' : '✗' }}
+          </span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

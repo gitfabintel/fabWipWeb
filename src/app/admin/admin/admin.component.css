@@ -1,0 +1,114 @@
+.customBg{
+    background-color: #fff;
+    border: 1px solid rgb(228, 221, 221);
+    padding: 5px;
+}
+
+.topstyle{
+    margin: 0px 0px 12px 6px;
+    border-bottom: 1px solid #cdc6c6;
+}
+
+.rebi{
+  top: -2px; right: 20px; position: absolute;
+    color: #fff;
+    padding: 0px 6px;
+    border-radius: 0px 8px;
+  z-index: 1;
+
+    -webkit-box-shadow: 0px -1px 5px 0px rgba(0, 0, 0, 0.1);
+    box-shadow: 0px 0px 2px 1px rgb(192 187 187 / 10%);
+}
+.hovercard :hover{
+    background-color: aqua;
+    cursor: pointer;
+    /* transform: scale(1.1); */
+}
+
+.swal2-title{
+  color: #ffff;
+}
+.remarks-truncate {
+  display: inline-block;
+  max-width: 200px;   /* set the width you want */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  vertical-align: bottom;
+}
+.customer-photo {
+    display: inline-block;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background-size: 32px 35px;
+    background-position: center center;
+    vertical-align: middle;
+    line-height: 32px;
+    box-shadow: inset 0 0 1px #999, inset 0 0 10px rgba(0,0,0,.2);
+    margin-left: 5px;
+}
+
+.customer-name {
+    display: inline-block;
+    vertical-align: middle;
+    line-height: 32px;
+    padding-left: 10px;
+}
+
+.red {
+    color: #d9534f;
+}
+
+.text-bold {
+    font-weight: 600;
+}
+
+.separator.separator-solid {
+    border-bottom: 1px solid #badcf5 !important;
+}
+
+.table-container{
+    display: flex;
+    justify-content: space-between;
+}
+.table-bordered th, .table-bordered td {
+    border: none; /* Remove all borders for table cells */
+  }
+.table thead th {
+    background-color: #e9e9f5;
+    ; /* Light gray background for header */
+  }
+  .table-bordered th, .table-bordered td {
+    border: 1px solid #ffffff00; /* Black border for table cells */
+  }
+
+      /* Adding rounded corners to the table headers and cells */
+      .table-bordered thead th:first-child {
+        border-top-left-radius: 20px;
+      }
+      .table-bordered thead th:last-child {
+        border-top-right-radius: 20px;
+      }
+      .table-bordered tbody td:first-child,
+      .table-bordered tbody th:first-child {
+        border-bottom-left-radius: 20px;
+      }
+      .table-bordered tbody td:last-child,
+      .table-bordered tbody th:last-child {
+        border-bottom-right-radius: 20px;
+      }
+.shadowforItem{
+  padding: 0px 7px 5px 12px;
+    border-radius: 11px;
+    box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
+    margin-bottom: 5px;
+}
+/* 
+      .nav .nav-link .nav-text {
+    flex-grow: 1;
+    font-size: 1rem;
+    color: #ffff !important;
+    font-weight: 400;
+    transition: color 0.15s ease, background-color 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+} */

@@ -1,0 +1,426 @@
+<div class="flex-row-fluid" style="zoom:92%">
+  <ngx-spinner bdColor="rgba(0,0,0,0.8)" size="medium" color="#fff"
+               type="ball-scale-multiple" [fullScreen]="false">
+    <p style="color:white;position:relative">Loading...</p>
+  </ngx-spinner>
+
+  <div class="container-fluid px-8 pb-10 pt-6">
+
+    <!-- ── Header ── -->
+    <div class="card card-custom mb-4"
+         style="border:1px solid #e2e8f0;box-shadow:0 1px 3px rgba(0,0,0,.08);">
+      <div class="card-body py-5 px-8">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h4 class="font-weight-bolder text-dark mb-1">
+              📜 Roll Register
+            </h4>
+            <span class="text-muted font-size-sm">
+              Order: <strong>{{ headerInfo.jobNumber || headerId }}</strong>
+              &nbsp;·&nbsp; Assign fabric rolls to lays
+            </span>
+          </div>
+          <button class="btn btn-light btn-sm font-weight-bold"
+                  (click)="back()">
+            ← Back to List
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+
+      <!-- ── LEFT: Roll Register ── -->
+      <div class="col-12 col-xl-8 mb-4">
+        <div class="card card-custom"
+             style="border:1px solid #e2e8f0;">
+         <div class="card-header py-4 d-flex justify-content-between align-items-center bg-white"
+     style="border-bottom:1px solid #e2e8f0;">
+  <h5 class="m-0 font-weight-bolder text-dark" style="font-size:13px;">
+    Fabric Rolls
+  </h5>
+  <div class="d-flex" style="gap:8px;">
+
+    <!-- Auto Assign button — only show if rolls entered but not yet assigned -->
+    <button class="btn btn-sm btn-warning font-weight-bold"
+            *ngIf="rolls.length > 0 && laySummary.length > 0"
+            (click)="confirmAutoAssign()"
+            title="Auto-assign rolls to lays based on meters needed">
+      ⚡ Auto Assign
+    </button>
+
+    <button class="btn btn-sm btn-primary font-weight-bold"
+            (click)="addRoll()">
+      + Add Roll
+    </button>
+
+  </div>
+</div>
+
+          <div class="card-body p-0">
+            <div *ngFor="let roll of rolls; let ri = index"
+                 style="border-bottom:2px solid #e2e8f0;">
+
+              <!-- Roll Header Row -->
+              <div style="background:#f8fafc;padding:10px 16px;
+                          display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+
+                <div style="flex:0 0 90px;">
+                  <label class="small text-muted font-weight-bold text-uppercase mb-1">
+                    Roll #
+                  </label>
+                  <input type="text" class="form-control form-control-sm"
+                         [(ngModel)]="roll.rollNo"
+                         placeholder="e.g. R-01"
+                         style="font-size:12px;">
+                </div>
+
+                <div style="flex:0 0 90px;">
+                  <label class="small text-muted font-weight-bold text-uppercase mb-1">
+                    Meters
+                  </label>
+                  <input type="number" class="form-control form-control-sm"
+                         [(ngModel)]="roll.meters"
+                         (ngModelChange)="recalculateAll()"
+                         min="0" step="0.01"
+                         style="font-size:12px;">
+                </div>
+
+                <div style="flex:0 0 80px;">
+                  <label class="small text-muted font-weight-bold text-uppercase mb-1">
+                    Width CM
+                  </label>
+                  <input type="number" class="form-control form-control-sm"
+                         [(ngModel)]="roll.widthCm"
+                         min="0"
+                         style="font-size:12px;">
+                </div>
+
+                <div style="flex:0 0 80px;">
+                  <label class="small text-muted font-weight-bold text-uppercase mb-1">
+                    Shade
+                  </label>
+                  <input type="text" class="form-control form-control-sm"
+                         [(ngModel)]="roll.shade"
+                         placeholder="A"
+                         style="font-size:12px;">
+                </div>
+
+                <div style="flex:0 0 90px;">
+                  <label class="small text-muted font-weight-bold text-uppercase mb-1">
+                    Shrinkage
+                  </label>
+                  <input type="text" class="form-control form-control-sm"
+                         [(ngModel)]="roll.shrinkage"
+                         placeholder="3X3%"
+                         style="font-size:12px;">
+                </div>
+
+                <div style="flex:1;min-width:120px;">
+                  <label class="small text-muted font-weight-bold text-uppercase mb-1">
+                    Remarks
+                  </label>
+                  <input type="text" class="form-control form-control-sm"
+                         [(ngModel)]="roll.remarks"
+                         placeholder="Optional"
+                         style="font-size:12px;">
+                </div>
+
+                <!-- Balance indicator -->
+                <div style="flex:0 0 120px;text-align:center;">
+                  <label class="small text-muted font-weight-bold text-uppercase mb-1">
+                    Balance
+                  </label>
+                  <div class="font-weight-bolder"
+                       style="font-size:13px;"
+                       [style.color]="roll.balanceMeters < 0 ? '#ef4444' :
+                                      roll.balanceMeters === 0 ? '#16a34a' : '#f59e0b'">
+                    {{ roll.balanceMeters?.toFixed(2) || roll.meters?.toFixed(2) || '0.00' }} m
+                  </div>
+                  <small [style.color]="roll.balanceMeters < 0 ? '#ef4444' :
+                                        roll.balanceMeters === 0 ? '#16a34a' : '#64748b'"
+                         style="font-size:10px;">
+                    {{ roll.balanceMeters < 0 ? 'OVER ASSIGNED' :
+                       roll.balanceMeters === 0 ? '✓ Fully Assigned' : 'Remaining' }}
+                  </small>
+                </div>
+
+                <div style="flex:0 0 40px;text-align:right;padding-top:18px;">
+                  <button class="btn btn-link p-0 text-danger"
+                          (click)="removeRoll(ri)">
+                    <i class="fa fa-trash"></i>
+                  </button>
+                </div>
+              </div>
+
+              <!-- Lay Assignments Table -->
+              <div style="padding:8px 16px 12px;">
+                <div style="font-size:11px;font-weight:700;color:#64748b;
+                            text-transform:uppercase;letter-spacing:.3px;
+                            margin-bottom:6px;">
+                  Lay Assignments
+                </div>
+
+                <table style="width:100%;border-collapse:collapse;font-size:12px;"
+                       *ngIf="roll.layAssignments.length > 0">
+                  <thead>
+                    <tr style="background:#f1f5f9;">
+                      <th style="padding:5px 8px;text-align:left;color:#64748b;
+                                 font-weight:600;">Lay</th>
+                      <th style="padding:5px 8px;text-align:center;color:#64748b;
+                                 font-weight:600;">Marker Length</th>
+                      <th style="padding:5px 8px;text-align:center;
+                                 color:#1e40af;font-weight:600;background:#eff6ff;">
+                        Meters Assigned
+                      </th>
+                      <th style="padding:5px 8px;text-align:center;
+                                 color:#1e40af;font-weight:600;background:#eff6ff;">
+                        Plies
+                      </th>
+                      <th style="padding:5px 8px;text-align:center;
+                                 color:#92400e;font-weight:600;background:#fefce8;">
+                        Used (m)
+                      </th>
+                      <th style="padding:5px 8px;text-align:center;
+                                 color:#92400e;font-weight:600;background:#fefce8;">
+                        Waste (m)
+                      </th>
+                      <th style="width:32px;"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr *ngFor="let asg of roll.layAssignments; let ai = index"
+                        [style.background]="ai % 2 === 0 ? '#fff' : '#fafafa'">
+                      <td style="padding:4px 8px;">
+                        <select class="form-control form-control"
+                                style="font-size:12px;"
+                                [(ngModel)]="asg.productionCuttingLayId"
+                                (ngModelChange)="onLaySelected(roll, asg)">
+                          <option [ngValue]="null">-- Select Lay --</option>
+                          <option *ngFor="let lay of availableLays"
+                                  [ngValue]="lay.id">
+                            {{ lay.markerName }} — {{ lay.sectionName }}
+                            ({{ lay.plies }} plies × {{ lay.markerLength }}m)
+                          </option>
+                        </select>
+                      </td>
+                      <td style="padding:4px 8px;text-align:center;
+                                 color:#64748b;font-size:11px;">
+                        {{ asg.markerLength || '-' }}
+                      </td>
+                      <td style="padding:4px 8px;background:#f0f7ff;">
+                        <input type="number"
+                               class="form-control form-control-sm text-center
+                                      font-weight-bold text-primary"
+                               [(ngModel)]="asg.metersAssigned"
+                               (ngModelChange)="onMetersAssignedChange(roll, asg)"
+                               min="0" step="0.01"
+                               style="font-size:12px;">
+                      </td>
+                      <td style="padding:5px 8px;text-align:center;
+                                 font-weight:700;color:#1e40af;background:#eff6ff;">
+                        {{ asg.plies || 0 }}
+                      </td>
+                      <td style="padding:5px 8px;text-align:center;
+                                 color:#92400e;background:#fefce8;font-size:11px;">
+                        {{ asg.usedMeters?.toFixed(2) || '0.00' }}
+                      </td>
+                      <td style="padding:5px 8px;text-align:center;
+                                 color:#92400e;background:#fefce8;font-size:11px;">
+                        {{ asg.wasteMeters?.toFixed(2) || '0.00' }}
+                      </td>
+                      <td style="padding:4px 8px;text-align:center;">
+                        <button class="btn btn-link p-0 text-danger"
+                                (click)="removeLayAssignment(roll, ai)">
+                          <i class="fa fa-minus-circle" style="font-size:11px;"></i>
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+
+                <button class="btn btn-link p-0 text-primary font-weight-bold mt-1"
+                        style="font-size:11px;"
+                        (click)="addLayAssignment(roll)">
+                  + Assign to Lay
+                </button>
+              </div>
+
+            </div>
+
+            <!-- Empty state -->
+            <div *ngIf="rolls.length === 0"
+                 class="text-center py-5 text-muted"
+                 style="font-size:13px;">
+              No rolls added yet. Click "+ Add Roll" to start.
+            </div>
+
+          </div>
+        </div>
+      </div>
+
+     <!-- ── RIGHT: Lay Summary ── -->
+<div class="col-12 col-xl-4">
+  <div class="card card-custom mb-4"
+       style="border:1px solid #e2e8f0;">
+    <div class="card-header py-4 bg-white"
+         style="border-bottom:1px solid #e2e8f0;">
+      <h5 class="m-0 font-weight-bolder text-dark" style="font-size:13px;">
+        Lay Requirements
+      </h5>
+    </div>
+    <div class="card-body p-0"
+         style="max-height:420px;overflow-y:auto;">
+
+      <!-- Per Section -->
+      <ng-container *ngFor="let secName of sections">
+
+        <!-- Section Header -->
+        <div style="background:#1e293b;padding:6px 12px;
+                    display:flex;justify-content:space-between;
+                    align-items:center;position:sticky;top:0;z-index:1;">
+          <span style="color:#fff;font-size:11px;font-weight:700;
+                       text-transform:uppercase;letter-spacing:.4px;">
+            {{ secName }}
+          </span>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span style="color:#94a3b8;font-size:10px;">
+              {{ getSectionAssigned(secName).toFixed(2) }}
+              / {{ getSectionNeeded(secName).toFixed(2) }}m
+            </span>
+            <span *ngIf="getSectionComplete(secName)"
+                  style="color:#4ade80;font-size:10px;font-weight:700;">
+              ✓
+            </span>
+          </div>
+        </div>
+
+        <!-- Lays in this section -->
+        <table style="width:100%;border-collapse:collapse;font-size:11px;">
+          <tbody>
+            <tr *ngFor="let ls of getLaysForSection(secName); let i = index"
+                [style.background]="i % 2 === 0 ? '#fff' : '#fafafa'">
+              <td style="padding:6px 12px;">
+                <span class="badge bg-warning text-dark font-weight-bold"
+                      style="padding:2px 6px;font-size:10px;">
+                  {{ ls.markerName }}
+                </span>
+              </td>
+              <td style="padding:6px 8px;text-align:center;color:#64748b;">
+                {{ ls.neededMeters }}m
+              </td>
+              <td style="padding:6px 8px;text-align:center;font-weight:700;"
+                  [style.color]="ls.assignedMeters >= ls.neededMeters ?
+                                 '#16a34a' : '#f59e0b'">
+                {{ ls.assignedMeters.toFixed(2) }}m
+              </td>
+              <td style="padding:6px 8px;text-align:center;
+                         font-weight:700;color:#1e40af;">
+                {{ ls.assignedPlies }}/{{ ls.totalPlies }}
+              </td>
+              <td style="padding:6px 8px;text-align:center;">
+                <span *ngIf="ls.complete && ls.totalPlies > 0"
+                      style="color:#16a34a;font-size:10px;font-weight:700;">
+                  ✓
+                </span>
+                <span *ngIf="!ls.complete && ls.totalPlies > 0"
+                      style="color:#f59e0b;font-size:10px;">
+                  {{ ls.remainingMeters.toFixed(2) }}m
+                </span>
+                <span *ngIf="ls.totalPlies === 0"
+                      style="color:#94a3b8;font-size:10px;">
+                  —
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+
+      </ng-container>
+
+    </div>
+
+    <!-- Grand Total -->
+    <div style="background:#f8fafc;border-top:2px solid #e2e8f0;
+                padding:8px 12px;display:flex;justify-content:space-between;">
+      <span style="font-weight:700;font-size:12px;">TOTAL</span>
+      <div style="display:flex;gap:16px;">
+        <span style="font-size:11px;color:#64748b;">
+          {{ totalNeededMeters.toFixed(2) }}m needed
+        </span>
+        <span style="font-size:11px;font-weight:700;color:#16a34a;">
+          {{ totalAssignedMeters.toFixed(2) }}m assigned
+        </span>
+        <span *ngIf="allLaysComplete"
+              style="color:#16a34a;font-weight:700;font-size:11px;">
+          ✓ All Done
+        </span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Roll Summary card stays same -->
+  <div class="card card-custom"
+       style="border:1px solid #e2e8f0;">
+    <div class="card-header py-4 bg-white"
+         style="border-bottom:1px solid #e2e8f0;">
+      <h5 class="m-0 font-weight-bolder text-dark" style="font-size:13px;">
+        Roll Summary
+      </h5>
+    </div>
+    <div class="card-body py-4 px-5">
+      <div class="d-flex justify-content-between mb-2">
+        <span style="font-size:12px;color:#64748b;">Total Rolls</span>
+        <strong>{{ rolls.length }}</strong>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span style="font-size:12px;color:#64748b;">Total Meters</span>
+        <strong>{{ totalRollMeters.toFixed(2) }} m</strong>
+      </div>
+      <div class="d-flex justify-content-between mb-2">
+        <span style="font-size:12px;color:#64748b;">Assigned Meters</span>
+        <strong style="color:#16a34a;">{{ totalAssignedMeters.toFixed(2) }} m</strong>
+      </div>
+      <div class="d-flex justify-content-between">
+        <span style="font-size:12px;color:#64748b;">Balance</span>
+        <strong [style.color]="(totalRollMeters - totalAssignedMeters) < 0 ?
+                               '#ef4444' : '#f59e0b'">
+          {{ (totalRollMeters - totalAssignedMeters).toFixed(2) }} m
+        </strong>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+    </div>
+
+    <!-- ── Save Button ── -->
+    <div class="card card-custom"
+         style="border:1px solid #e2e8f0;position:sticky;bottom:20px;z-index:100;
+                box-shadow:0 -2px 8px rgba(0,0,0,.06);">
+      <div class="card-body py-4 px-8">
+        <div class="d-flex justify-content-between align-items-center">
+          <div style="font-size:12px;color:#64748b;">
+            <i class="fa fa-info-circle mr-1"></i>
+            After saving, go back to list and click
+            <strong>Generate Bundles</strong>
+          </div>
+          <div class="d-flex" style="gap:8px;">
+            <button class="btn btn-light btn-sm font-weight-bold"
+                    (click)="back()">
+              Cancel
+            </button>
+            <button class="btn btn-success btn-sm font-weight-bolder"
+                    style="padding:0 20px;"
+                    (click)="save()">
+              💾 Save Roll Register
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

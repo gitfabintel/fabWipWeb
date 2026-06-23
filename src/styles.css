@@ -1,0 +1,462 @@
+/* You can add global styles to this file, and also import other style files */
+@import "~@ng-select/ng-select/themes/default.theme.css";
+/* @import "~@ng-select/ng-select/themes/material.theme.css"; */
+@import 'ngx-toastr/toastr';
+
+/* NGX TABLE */
+/* @import "./assets/plugins/global/plugins.bundle.css";
+@import "src/assets/css/style.bundle.css";
+@import "src/assets/css/style.bundle.min.css"; */
+  [data-bs-theme=dark] {
+    --bs-page-bg: #151521;
+    --bs-app-blank-bg: #151521;
+    --bs-header-bg-color :#1E1E2D;
+    --bs-header-border-bottom: 1px solid #2D2D43;
+    --bs-header-box-shadow: none;
+    --bs-footer-bg-color: #1B1B28;
+}
+body {
+  margin: 0;
+  font-family: Poppins, Helvetica, "sans-serif" !important;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #414141;
+  text-align: left;
+  background-color:  var(--bs-page-bg); }
+
+
+.ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked {
+    background-color: #dfe4e9 !important;
+    color: #333;
+}
+.fullscreen-modal .modal-dialog {
+    max-width: 100vw !important;
+    width: 100vw !important;
+    height: 100vh;
+    margin-left: 16px !important;
+    min-height: calc(100% - 3.5rem);
+}
+
+.fullscreen-modal .modal-content {
+    height: 100vh;
+    border-radius: 0;
+}
+
+.fullscreen-modal .modal-body {
+    height: calc(100vh - 120px); /* header + footer */
+    overflow: auto;
+}
+  .modal-fullscreen .modal-dialog {
+  width: 100vw;
+  max-width: 100vw;
+  height: 100vh;
+  margin: 0;
+}
+.custom-dropdown1 .ng-dropdown-panel {
+    max-height: 300px !important;
+    width: 90vw !important;
+}
+.custom-dropdown2 .ng-dropdown-panel {
+    max-height: 300px !important;
+    width: 70vw !important;
+}
+.modal-fullscreen .modal-content {
+  height: 100vh;
+  border-radius: 0;
+  display: flex;
+  flex-direction: column;
+}
+.k-grid tr.gold {
+  background-color: #dad8d8 !important;
+  /* box-shadow: 0 0 5px rgba(128, 0, 128, 0.5); */
+}
+#my-grid tr.gold {
+  background-color: #c4c4c4  !important;
+}
+.required{
+  color: indianred;
+  font-size: 16px;
+}
+#my-grid tr.green {
+  background-color: #ffff;
+}
+.ng-select.ng-select-single .ng-select-container .ng-value-container .ng-value {
+    white-space: nowrap;
+    overflow: visible !important;
+    text-overflow: ellipsis;
+}
+..swal2-model .swal2-icon {
+    margin: 2rem 0auto 1rem auto !important;
+}
+.swal2-toast .swal2-icon{
+   margin: 0rem 0 0rem 0px !important;
+}
+.customLR{
+  padding-right: 4.5px !important;
+    padding-left: 4.5px !important;
+}
+   .main{
+    zoom: 85% !important;
+    background: #e9e9e9;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.col {
+  flex: 1;
+  text-align: left !important;
+  padding: 0px !important;
+  overflow: hidden;
+}
+#fullscreen-btn {
+    /* padding: 10px;
+    font-size: 16px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer; */
+}
+.custom-dropdown .ng-dropdown-panel {
+  max-height: 300px !important; /* Expand dropdown height */
+  width: 50vw !important; /* Set dropdown width */
+}
+
+.modal-content {
+
+    border-radius: 2rem !important;
+
+}
+.dropdown-table {
+  display: flex;
+  justify-content: space-between;
+  width: 106%;
+}
+
+.dropdown-table .col {
+  flex: 1;
+  padding: 5px;
+  text-align: center;
+}
+/* Ensure Text Stays Inside Each Box */
+.col {
+  flex: 1;
+  text-align: left !important;
+  padding: 5px;
+  overflow: hidden;
+
+}
+
+/* Set Column Sizes */
+.col-small {
+  flex: 0.8; /* Smaller size */
+  max-width: 80px;
+}
+
+.col-medium {
+  flex: 1; /* Medium size */
+  max-width: 126px;
+}
+
+.col-large {
+  flex: 1.5; /* Largest column */
+  max-width: 422px;
+}
+
+/* Hover Effect to Show Full Text */
+/* .col:hover {
+  overflow: visible;
+  white-space: normal;
+  word-wrap: break-word;
+  position: absolute;
+  background: #fff;
+  z-index: 1000;
+  padding: 5px;
+  border: 1px solid #ccc;
+  box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+} */
+#fullscreen-icon::before {
+    content: "\f065"; /* Unicode for the 'expand' icon */
+}
+/* @media (min-width: 1200px) {
+    .container, .container-sm, .container-md, .container-lg, .container-xl {
+        max-width: 1225px !important;
+    }
+} */
+#fullscreen-btn.exit-fullscreen #fullscreen-icon::before {
+    content: "\f066"; /* Unicode for the 'compress' (exit full screen) icon */
+}
+
+.slide-from-left .modal-content {
+    animation: slideFromLeft 0.9s ease-in-out !important;
+  }
+
+  @keyframes slideFromLeft {
+    0% {
+      transform: translateX(-100%); /* Start off-screen to the left */
+    }
+    100% {
+      transform: translateX(0); /* End position is on-screen */
+    }
+  }
+  .k-textbox {
+    border-radius: 10px !important;
+
+    height: calc(1.4285714286em + 20px) !important;
+
+    font-size: 14px !important;
+
+}
+.headerP{
+    margin: 16px 5px 0px 5px;
+    padding: 13px 0px 0px 0px;
+}
+
+
+.fi{
+    line-height: 29px !important;
+
+}
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container
+
+ {
+    padding-top: 5px;
+    padding-left: 5px;
+}
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+    font-size: 12px !important;
+    margin-bottom: 5px;
+    color: #333;
+    background-color: #dbeaf9;
+    border-radius: 12px;
+    margin-right: 5px;
+    font-weight: 600;
+}
+.ng-select.ng-select-multiple .ng-select-container .ng-value-container .ng-value .ng-value-icon {
+    display: inline-block;
+    padding: 4px 9px;
+    font-size: 18px !important;
+}
+.form-control:disabled, .form-control[readonly] {
+    background-color: #e4e9ef !important;
+    opacity: 1;
+}
+
+.modal-footer {
+    display: -webkit-box !important;
+    display: -ms-flexbox !important;
+    display: flex !important;
+    -ms-flex-wrap: wrap !important;
+    flex-wrap: wrap !important;
+    -webkit-box-align: center !important;
+    -ms-flex-align: center !important;
+    align-items: center !important;
+    -webkit-box-pack: end !important;
+    -ms-flex-pack: end !important;
+    justify-content: flex-end !important;
+    padding: 1rem !important;
+    border-top: 1px solid #ECF0F3 !important;
+    border-bottom-right-radius: 0.42rem !important;
+    border-bottom-left-radius: 0.42rem !important;
+  }
+  .modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1040;
+    width: 104vw !important;
+    height: 104vh !important;
+    background-color: #494949;
+    z-index: 1000 !important;
+  }
+
+  @media (min-width: 1200px) {
+    .modal-dialog.modal-xl {
+        max-width: 1325px !important;
+    }
+}
+
+@media (min-width: 1400px) {
+  .modal-dialog.modal-xl {
+      max-width: 1429px !important;
+  }
+}
+@media (min-width: 992px) {
+  .modal-lg, .modal-xl {
+      max-width: 1116px !important;
+  }
+}
+  .form-group label {
+    font-size: 1rem;
+    font-weight: 500 !important;
+    color: #212324 !important;
+}
+
+ label {
+    font-size: 1rem;
+    font-weight: 500 !important;
+    color: #212324 !important;
+}
+
+.ng-dropdown-panel.ng-select-bottom {
+    top: calc(100% - 0.1em) !important;
+    box-shadow: 0 5px 5px -3px rgba(0, 0, 0, 0.2), 0 8px 10px 1px rgba(0, 0, 0, 0.14), 0 3px 14px 2px rgba(0, 0, 0, 0.12);
+}
+.form-group {
+  margin-bottom: .2rem !important;
+}
+.ng-select .ng-arrow-wrapper {
+  width: 30px !important;
+  padding-right: 5px !important;
+  padding-top: 7px !important;
+}
+.ng-select .ng-select-container {
+    color: rgba(0, 0, 0, 0.87);
+    align-items: baseline;
+    min-height: 35.5px !important;
+}
+.ng-select .ng-select-container .ng-value-container {
+  align-items: center;
+  padding-left: 14px !important;
+  padding-top: 7px !important;
+}
+.custom-ng-select .ng-select-container {
+    border-bottom-color: blue !important; /* Change this to your desired color */
+}
+
+::-webkit-scrollbar {
+    width: 7px;
+  }
+  
+  /* Track */
+  ::-webkit-scrollbar-track {
+    background: #f1f1f1; 
+  }
+   
+  /* Handle */
+  ::-webkit-scrollbar-thumb {
+    background: #00adefa8; 
+  }
+  
+  /* Handle on hover */
+  ::-webkit-scrollbar-thumb:hover {
+    background: #00adefa8; 
+  }
+
+
+  /* ═══════════════════════════════════════════════
+   FULL WIDTH LAYOUT — all breakpoints
+════════════════════════════════════════════════ */
+
+/* Override all Bootstrap container max-widths */
+.container,
+.container-sm,
+.container-md,
+.container-lg,
+.container-xl,
+.container-xxl,
+.container-fluid {
+  max-width: 100% !important;
+  width: 100% !important;
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+/* Override every Bootstrap breakpoint */
+@media (min-width: 576px) {
+  .container, .container-sm {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .container, .container-sm, .container-md {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 992px) {
+  .container, .container-sm, .container-md, .container-lg {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 1200px) {
+  .container, .container-sm, .container-md, .container-lg, .container-xl {
+    max-width: 100% !important;
+  }
+}
+
+@media (min-width: 1400px) {
+  .container,
+  .container-sm,
+  .container-md,
+  .container-lg,
+  .container-xl,
+  .container-xxl {
+    max-width: 100% !important;
+    padding-left: 16px !important;
+    padding-right: 16px !important;
+  }
+}
+
+/* Metronic specific overrides */
+.wrapper,
+#kt_wrapper {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+.content,
+#kt_content {
+padding-left: 271px !important;
+    padding-right: 10px !important;
+}
+aside {
+  transition: width 0.3s ease !important;
+}
+
+body.aside-minimize .aside {
+  width: 0px !important;
+}
+.content, #kt_content {
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+}
+@media (min-width: 992px) {
+    .h-lg-25px {
+        height: 43px !important;
+    }
+}
+body.aside-minimize .aside .aside-user,
+body.aside-minimize .aside .aside-search,
+body.aside-minimize .aside .menu-title,
+body.aside-minimize .aside .menu-arrow,
+body.aside-minimize .aside .aside-footer .btn-label {
+  display: none !important;
+}
+
+body.aside-minimize .wrapper {
+  padding-left: 75px !important;
+  transition: padding-left 0.3s ease !important;
+}
+/* Toolbar container */
+.toolbar .container-xxl,
+.toolbar .container-fluid {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+/* Header container */
+.header .container-xxl,
+.header .container-fluid {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+
+/* Footer container */
+.footer .container-fluid {
+  padding-left: 16px !important;
+  padding-right: 16px !important;
+}
+

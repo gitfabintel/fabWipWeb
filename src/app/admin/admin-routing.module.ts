@@ -1,0 +1,30 @@
+import { NgModule } from '@angular/core';
+import { RouterModule, Routes } from '@angular/router';
+import { AdminComponent } from './admin/admin.component';
+
+import { AuthGuard } from '../shared/auth/auth.guard';
+
+
+
+const routes: Routes = [
+  {
+    path: '',
+    component: AdminComponent,
+    canActivate: [AuthGuard],
+    data: {
+      title: 'Dashboard',
+      breadcrumbs: [
+        { label: 'Dashboards', url: '/admin' },
+        { label: 'Default' }
+      ]
+    }
+  }
+
+   
+];
+
+@NgModule({
+  imports: [RouterModule.forChild(routes)],
+  exports: [RouterModule],
+})
+export class AdminRoutingModule {}

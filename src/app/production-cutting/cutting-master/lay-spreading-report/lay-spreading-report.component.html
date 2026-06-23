@@ -1,0 +1,431 @@
+<div class="lsr-root">
+<ngx-spinner bdColor="rgba(255,255,255,0.8)" size="medium"
+             color="#2563eb" type="ball-scale-multiple"
+             [fullScreen]="false">
+  <p class="lsr-spinner-text">Loading report...</p>
+</ngx-spinner>
+
+  <!-- ══════════════════════════════════════════
+       TOP BAR
+  ═══════════════════════════════════════════ -->
+<div class="lsr-topbar">
+  <div class="lsr-topbar-left">
+    <button class="lsr-back-btn" (click)="back()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      Back
+    </button>
+    <div class="lsr-topbar-title">
+      <span class="lsr-topbar-eyebrow">Quality Control Cutting</span>
+      <h1 class="lsr-topbar-heading">Lay Spreading Report</h1>
+    </div>
+<!-- ── Order identity strip ── -->
+    <div class="lsr-order-strip">
+      <span class="lsr-order-chip lsr-order-chip--primary">
+        {{ orderInfo.productionCuttingHeaderNumber || '—' }}
+      </span>
+      <span class="lsr-order-chip">WO-{{ orderInfo.jobNumber || '—' }}</span>
+      <span class="lsr-order-sep">·</span>
+      <span class="lsr-order-text">{{ orderInfo.styleName || '—' }}</span>
+      <span class="lsr-order-sep">·</span>
+      <span class="lsr-order-text">({{ orderInfo.colorName || '—' }})</span>
+      <span class="lsr-order-sep" *ngIf="orderInfo.articleName">·</span>
+      <span class="lsr-order-text" *ngIf="orderInfo.articleName">
+        {{ orderInfo.articleName }}
+      </span>
+    </div>
+
+  </div>
+
+
+  
+
+
+  <div style="display:flex;align-items:center;gap:12px;">
+    <button class="lsr-back-btn" (click)="printLaySpreadingReport()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+           stroke="currentColor" stroke-width="2.5">
+        <polyline points="6 9 6 2 18 2 18 9"></polyline>
+        <path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"></path>
+        <rect x="6" y="14" width="12" height="8"></rect>
+      </svg>
+      Print Report
+    </button>
+
+    <div class="lsr-topbar-stats">
+      <div class="lsr-stat">
+        <span class="lsr-stat-value" style="color:#2563eb;">
+          {{ grandTotalPlies }}
+        </span>
+        <span class="lsr-stat-label">Total Plies</span>
+      </div>
+      <div class="lsr-stat-divider"></div>
+      <div class="lsr-stat">
+        <span class="lsr-stat-value" style="color:#15803d;">
+          {{ grandTotalCutQty }}
+        </span>
+        <span class="lsr-stat-label">Total Cut Qty</span>
+      </div>
+      <div class="lsr-stat-divider"></div>
+      <div class="lsr-stat">
+        <span class="lsr-stat-value" style="color:#d97706;">
+          {{ entries.length }}
+        </span>
+        <span class="lsr-stat-label">Lays</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+  <div class="lsr-body">
+
+    <!-- ══════════════════════════════════════════
+         REPORT INFO CARD
+    ═══════════════════════════════════════════ -->
+    <div class="lsr-info-card">
+      <div class="lsr-info-card-header">
+        <span class="lsr-section-tag">01</span>
+        <span class="lsr-section-title">Report Information</span>
+      </div>
+      <div class="lsr-info-grid">
+        <div class="lsr-field">
+          <label class="lsr-label">Date</label>
+          <input type="date" class="lsr-input" [(ngModel)]="report.reportDate">
+        </div>
+        <div class="lsr-field">
+          <label class="lsr-label">Inspector Name</label>
+          <input type="text" class="lsr-input" [(ngModel)]="report.inspectorName"
+                 placeholder="e.g. Hamza">
+        </div>
+        <div class="lsr-field">
+          <label class="lsr-label">Fabric Relax</label>
+          <input type="text" class="lsr-input" [(ngModel)]="report.fabricRelax"
+                 placeholder="e.g. 12 hours">
+        </div>
+        <div class="lsr-field">
+          <label class="lsr-label">Wash / Unwash</label>
+          <input type="text" class="lsr-input" [(ngModel)]="report.washUnwash"
+                 placeholder="e.g. Rinse">
+        </div>
+        <div class="lsr-field lsr-field--wide">
+          <label class="lsr-label">Remarks</label>
+          <input type="text" class="lsr-input" [(ngModel)]="report.remarks"
+                 placeholder="Optional notes">
+        </div>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         LAY ENTRIES — grouped by section
+    ═══════════════════════════════════════════ -->
+    <div class="lsr-section-header">
+      <span class="lsr-section-tag">02</span>
+      <span class="lsr-section-title">Lay Entries</span>
+      <span class="lsr-section-hint">Each roll row = one Cut# block in bundle core sheet</span>
+    </div>
+
+    <ng-container *ngFor="let secName of sections">
+
+      <div class="lsr-section-divider">
+        <span class="lsr-section-divider-dot"
+              [style.background]="getEntriesForSection(secName)[0]?.sectionColor || '#2563eb'">
+        </span>
+        <span class="lsr-section-divider-text">{{ secName }}</span>
+      </div>
+
+      <div *ngFor="let entry of getEntriesForSection(secName); let ei = index"
+           class="lsr-lay-card">
+
+        <!-- Lay Header Band -->
+        <div class="lsr-lay-header" [style.border-left-color]="entry.sectionColor || '#2563eb'">
+
+          <div class="lsr-lay-header-left">
+            <span class="lsr-marker-badge">{{ entry.markerName }}</span>
+
+            <div class="lsr-lay-meta">
+              <span class="lsr-lay-meta-item">
+                <span class="lsr-lay-meta-label">Section</span>
+                <span class="lsr-lay-meta-value"
+                      [style.color]="entry.sectionColor || '#2563eb'">
+                  {{ entry.sectionName }}
+                </span>
+              </span>
+              <span class="lsr-lay-meta-sep">·</span>
+              <span class="lsr-lay-meta-item">
+                <span class="lsr-lay-meta-label">Lay Length</span>
+                <span class="lsr-lay-meta-value">{{ entry.layLength }}m</span>
+              </span>
+              <span class="lsr-lay-meta-sep">·</span>
+              <span class="lsr-lay-meta-item">
+                <span class="lsr-lay-meta-label">Shrinkage</span>
+                <input type="text" class="lsr-inline-input"
+                       [(ngModel)]="entry.shrinkage"
+                       placeholder="3X3%">
+              </span>
+            </div>
+          </div>
+
+          <div class="lsr-lay-header-right">
+            <!-- Plies progress -->
+            <div class="lsr-plies-badge"
+                 [class.lsr-plies-badge--ok]="entry.totalLayPlies === entry.totalPlies"
+                 [class.lsr-plies-badge--over]="entry.totalLayPlies > entry.totalPlies"
+                 [class.lsr-plies-badge--under]="entry.totalLayPlies < entry.totalPlies">
+              <span class="lsr-plies-nums">
+                {{ entry.totalLayPlies }}<span class="lsr-plies-sep">/</span>{{ entry.totalPlies }}
+              </span>
+              <span class="lsr-plies-label">plies</span>
+              <svg *ngIf="entry.totalLayPlies === entry.totalPlies"
+                   width="14" height="14" viewBox="0 0 24 24"
+                   fill="none" stroke="#15803d" stroke-width="3">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+              <span *ngIf="entry.totalLayPlies > entry.totalPlies"
+                    style="color:#dc2626;font-size:12px;">⚠</span>
+            </div>
+
+            <!-- KPIs -->
+            <div class="lsr-kpis">
+              <div class="lsr-kpi">
+                <span class="lsr-kpi-val" style="color:#15803d;">{{ entry.totalCutQty }}</span>
+                <span class="lsr-kpi-lbl">Cut Qty</span>
+              </div>
+              <div class="lsr-kpi">
+                <span class="lsr-kpi-val" style="color:#7e22ce;">
+                  {{ entry.totalFabricUsed }}m
+                </span>
+                <span class="lsr-kpi-lbl">Fabric Used</span>
+              </div>
+              <div class="lsr-kpi">
+                <span class="lsr-kpi-val" style="color:#dc2626;">{{ entry.totalFaults }}</span>
+                <span class="lsr-kpi-lbl">4-Pt Faults</span>
+              </div>
+              <div class="lsr-kpi">
+                <span class="lsr-kpi-val" style="color:#d97706;">{{ entry.dhu }}%</span>
+                <span class="lsr-kpi-lbl">DHU</span>
+              </div>
+            </div>
+
+            <button class="lsr-add-roll-btn" (click)="addRoll(entry)">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                   stroke="currentColor" stroke-width="2.5">
+                <line x1="12" y1="5" x2="12" y2="19"></line>
+                <line x1="5" y1="12" x2="19" y2="12"></line>
+              </svg>
+              Add Roll
+            </button>
+          </div>
+        </div>
+
+        <!-- Rolls Table -->
+        <div class="lsr-table-wrap">
+          <table class="lsr-table">
+            <thead>
+              <tr>
+                <th class="lsr-th lsr-th--center" style="width:44px;">Sr#</th>
+                <th class="lsr-th" style="width:88px;">Roll #</th>
+                <th class="lsr-th lsr-th--center" style="width:80px;">Meters</th>
+                <th class="lsr-th lsr-th--center" style="width:64px;">Shade</th>
+                <th class="lsr-th lsr-th--center lsr-th--accent-blue" style="width:80px;">
+                  Plies ★
+                </th>
+                <th class="lsr-th lsr-th--center" style="width:80px;">Plies Serial</th>
+                <th class="lsr-th lsr-th--center lsr-th--accent-green" style="width:80px;">
+                  Cut Pcs
+                </th>
+                <th class="lsr-th lsr-th--center" style="width:80px;background:#fdf4ff;color:#7e22ce;">
+                  Fabric Used
+                </th>
+                <th class="lsr-th lsr-th--center" style="width:60px;">Diff</th>
+                <th class="lsr-th lsr-th--center" style="width:80px;">Miss Pick</th>
+                <th class="lsr-th lsr-th--center" style="width:60px;">Knots</th>
+                <th class="lsr-th lsr-th--center lsr-th--accent-amber" style="width:76px;">
+                  4-Points
+                </th>
+                <th class="lsr-th">Comments</th>
+                <th style="width:32px;"></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let roll of entry.rolls; let ri = index"
+                  class="lsr-tr" [class.lsr-tr--alt]="ri % 2 !== 0">
+
+                <td class="lsr-td lsr-td--sr">{{ roll.srNo }}</td>
+
+                <td class="lsr-td">
+                  <input type="text" class="lsr-cell-input"
+                         [(ngModel)]="roll.rollNo" placeholder="225">
+                </td>
+
+                <td class="lsr-td">
+                  <input type="number" class="lsr-cell-input lsr-cell-input--center"
+                         [(ngModel)]="roll.meters" min="0" step="0.01">
+                </td>
+
+                <td class="lsr-td">
+                  <input type="text" class="lsr-cell-input lsr-cell-input--center"
+                         [(ngModel)]="roll.shade" placeholder="A">
+                </td>
+
+                <td class="lsr-td lsr-td--plies">
+                  <input type="number"
+                         class="lsr-cell-input lsr-cell-input--center lsr-cell-input--plies"
+                         [(ngModel)]="roll.plies"
+                         (ngModelChange)="recalculateEntry(entry)"
+                         min="0">
+                </td>
+
+                <td class="lsr-td">
+                  <input type="text" class="lsr-cell-input lsr-cell-input--center"
+                         [(ngModel)]="roll.pliesSerial">
+                </td>
+
+                <td class="lsr-td lsr-td--cutpcs">
+                  <input type="number"
+                         class="lsr-cell-input lsr-cell-input--center"
+                         [(ngModel)]="roll.cutPcs"
+                         (ngModelChange)="recalculateEntry(entry)"
+                         style="color:#15803d;font-weight:700;font-size:13px;"
+                         min="0"
+                         placeholder="0">
+                </td>
+
+                <td class="lsr-td" style="text-align:center;font-size:11px;
+                             color:#7e22ce;background:#fdf4ff;">
+                  {{ roll.fabricUsed > 0 ? roll.fabricUsed + 'm' : '—' }}
+                </td>
+
+                <td class="lsr-td">
+                  <input type="number" class="lsr-cell-input lsr-cell-input--center"
+                         [(ngModel)]="roll.difference">
+                </td>
+
+                <td class="lsr-td">
+                  <input type="number" class="lsr-cell-input lsr-cell-input--center"
+                         [(ngModel)]="roll.missPick">
+                </td>
+
+                <td class="lsr-td">
+                  <input type="number" class="lsr-cell-input lsr-cell-input--center"
+                         [(ngModel)]="roll.knots">
+                </td>
+
+                <td class="lsr-td lsr-td--fourpt">
+                  <input type="number"
+                         class="lsr-cell-input lsr-cell-input--center lsr-cell-input--fourpt"
+                         [(ngModel)]="roll.fourPoints"
+                         (ngModelChange)="recalculateEntry(entry)">
+                </td>
+
+                <td class="lsr-td">
+                  <input type="text" class="lsr-cell-input"
+                         [(ngModel)]="roll.comments" placeholder="—">
+                </td>
+
+                <td class="lsr-td" style="text-align:center;">
+                  <button *ngIf="entry.rolls.length > 1"
+                          class="lsr-del-btn"
+                          (click)="removeRoll(entry, ri)"
+                          title="Remove row">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none"
+                         stroke="currentColor" stroke-width="2.5">
+                      <polyline points="3 6 5 6 21 6"></polyline>
+                      <path d="M19 6l-1 14H6L5 6"></path>
+                      <path d="M10 11v6M14 11v6"></path>
+                      <path d="M9 6V4h6v2"></path>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+
+            <!-- Totals Footer -->
+            <tfoot>
+              <tr class="lsr-tfoot-row">
+                <td colspan="4" class="lsr-tfoot-label">TOTAL</td>
+                <td class="lsr-tfoot-cell lsr-tfoot-cell--blue">
+                  {{ entry.totalLayPlies }}
+                </td>
+                <td></td>
+                <td class="lsr-tfoot-cell lsr-tfoot-cell--green">
+                  {{ entry.totalCutQty }}
+                </td>
+                <td class="lsr-tfoot-cell" style="color:#7e22ce;background:#fdf4ff;">
+                  {{ entry.totalFabricUsed }}m
+                </td>
+                <td colspan="3"></td>
+                <td class="lsr-tfoot-cell lsr-tfoot-cell--amber">
+                  {{ entry.totalFaults }}
+                </td>
+                <td colspan="2" class="lsr-tfoot-extra">
+                  <span>DHU: <strong>{{ entry.dhu }}%</strong></span>
+                  <span style="margin-left:16px;">Fabric Short/Plus:</span>
+                  <input type="text" class="lsr-cell-input"
+                         [(ngModel)]="entry.fabricShortPlus"
+                         style="width:72px;margin-left:6px;" placeholder="—">
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+      </div>
+
+    </ng-container>
+
+    <!-- ══════════════════════════════════════════
+         GRAND TOTAL FOOTER BAR
+    ═══════════════════════════════════════════ -->
+    <div class="lsr-grand-total">
+      <div class="lsr-grand-item">
+        <span class="lsr-grand-label">Grand Total Plies</span>
+        <span class="lsr-grand-value" style="color:#2563eb;">
+          {{ grandTotalPlies }}
+        </span>
+      </div>
+      <div class="lsr-grand-divider"></div>
+      <div class="lsr-grand-item">
+        <span class="lsr-grand-label">Grand Total Cut Qty</span>
+        <span class="lsr-grand-value" style="color:#15803d;">
+          {{ grandTotalCutQty }}
+        </span>
+      </div>
+      <div class="lsr-grand-divider"></div>
+      <div class="lsr-grand-item">
+        <span class="lsr-grand-label">Lays</span>
+        <span class="lsr-grand-value" style="color:#1e293b;">
+          {{ entries.length }}
+        </span>
+      </div>
+    </div>
+
+    <!-- ══════════════════════════════════════════
+         STICKY SAVE BAR
+    ═══════════════════════════════════════════ -->
+    <div class="lsr-save-bar">
+      <div class="lsr-save-hint">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none"
+             stroke="#2563eb" stroke-width="2">
+          <circle cx="12" cy="12" r="10"></circle>
+          <line x1="12" y1="8" x2="12" y2="12"></line>
+          <line x1="12" y1="16" x2="12.01" y2="16"></line>
+        </svg>
+        Save report → then click <strong>Generate Bundles</strong> from the list
+      </div>
+      <div class="lsr-save-actions">
+        <button class="lsr-cancel-btn" (click)="back()">Cancel</button>
+        <button class="lsr-save-btn" (click)="save()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none"
+               stroke="currentColor" stroke-width="2.5">
+            <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z"></path>
+            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+            <polyline points="7 3 7 8 15 8"></polyline>
+          </svg>
+          Save Spreading Report
+        </button>
+      </div>
+    </div>
+
+  </div><!-- /.lsr-body -->
+</div>

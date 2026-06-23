@@ -1,0 +1,182 @@
+/* ── sticky column helpers ── */
+.c-th-sticky {
+  position: sticky;
+  z-index: 3;
+  background: #1e293b;
+  color: #fff;
+  text-align: center;
+  padding: 9px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  border: 1px solid #334155;
+  white-space: nowrap;
+}
+
+.c-th-meta {
+  background: #1e293b;
+  color: #fff;
+  text-align: center;
+  padding: 9px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .4px;
+  text-transform: uppercase;
+  border: 1px solid #334155;
+  white-space: nowrap;
+}
+
+.c-td-sticky {
+  position: sticky;
+  z-index: 2;
+  padding: 5px 3px;
+  border: 1px solid #e2e8f0;
+}
+
+.c-label-sticky {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+}
+
+/* ── qty input ── */
+.c-qty-input {
+  width: 34px;
+  height: 28px;
+  border: 1px solid;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 0;
+  background: transparent;
+  outline: none;
+  transition: box-shadow .1s;
+}
+.c-qty-input:focus {
+  box-shadow: 0 0 0 2px rgba(37,99,235,.3);
+}
+.c-qty-input::-webkit-inner-spin-button,
+.c-qty-input::-webkit-outer-spin-button { opacity: 1; }
+
+/* ── meta input ── */
+.c-meta-input {
+  height: 28px;
+  border: 1px solid #e2e8f0;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 11px;
+  padding: 0 4px;
+  background: transparent;
+  outline: none;
+  transition: border-color .1s;
+}
+.c-meta-input:focus { border-color: #93c5fd; }
+.c-meta-input::-webkit-inner-spin-button,
+.c-meta-input::-webkit-outer-spin-button { opacity: 1; }
+
+/* ── table base ── */
+.cutting-table {
+  border-collapse: collapse;
+  font-size: 12px;
+  white-space: nowrap;
+}
+.cutting-table td,
+.cutting-table th { vertical-align: middle; }
+.style-banner {
+  span {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    color: #64748b;
+    margin-bottom: 2px;
+  }
+  strong {
+    font-size: 13px;
+  }
+}
+
+.clickable-section-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+  cursor: pointer;
+  transition: all 0.15s ease-in-out;
+
+  &:hover {
+    transform: translateX(4px);
+    border-color: #cbd5e1;
+  }
+}
+
+.active-section-tab {
+  background-color: #eff6ff !important;
+  border-color: #bfdbfe !important;
+  box-shadow: 0 2px 4px rgba(37,99,235,0.06) !important;
+}
+
+/* Tabular Grid Densities */
+.summary-layout-table, .matrix-input-table {
+  th {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    padding: 8px 6px !important;
+    vertical-align: middle;
+  }
+  td {
+    font-size: 12px;
+    padding: 6px !important;
+    vertical-align: middle;
+  }
+}
+
+/* Input Fields Isolation */
+.table-inline-input {
+  width: 100%;
+  height: 26px;
+  border: 1px solid transparent;
+  background: transparent;
+  text-align: center;
+  font-size: 12px;
+  border-radius: 4px;
+  outline: none;
+  transition: all 0.1s ease;
+
+  &:focus, &:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
+  }
+}
+
+.matrix-cell-input {
+  width: 50px;
+  height: 26px;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #0f172a;
+  background: #ffffff;
+  outline: none;
+  margin: 0 auto;
+  display: block;
+
+  &:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
+  }
+
+  /* Clear default spinners inside matrix views */
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  &[type=number] {
+    -moz-appearance: textfield;
+  }
+}

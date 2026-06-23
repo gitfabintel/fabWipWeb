@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>Fab-Wip</title>
+  <base href="/" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" type="image/x-icon" href="./assets/favicon.ico" />
+  <meta name="78940484456-uajh7p8if5oef07huvquj50vrashd2b0.apps.googleusercontent.com"
+    content="uwPNb2Fxy2Ya35TeMl01s9GD" />
+  <link rel="shortcut icon" href="./assets/favicon.ico" />
+
+
+  <link href="assets/css/style.bundle.css" rel="stylesheet" type="text/css" />
+  <link href="assets/plugins/global/plugins.bundle.css" rel="stylesheet" type="text/css" />
+ <link rel="stylesheet" href="./assets/css/default-table-main.css" />
+  <!-- Metronic v8 Styles (order matters) -->
+
+</head>
+
+<body id="kt_body" class="aside-enabled">
+
+ <script>
+// window.__Zone_disable_Error_on_Architecture_Promise_Keep_Context = true;
+    // window.__Zone_symbol__Promise = window.Promise;
+
+// window['__zone_symbol__ZoneAwarePromise'] = true;
+    // var hostUrl = "assets/";
+
+  
+    window.KTAppSettings = {
+      breakpoints: { sm: 576, md: 768, lg: 992, xl: 1200, xxl: 1400 }
+    };
+
+
+    var defaultThemeMode = "light";
+    var themeMode;
+    if (document.documentElement) {
+      if (document.documentElement.hasAttribute("data-bs-theme-mode")) {
+        themeMode = document.documentElement.getAttribute("data-bs-theme-mode");
+      } else {
+        if (localStorage.getItem("data-bs-theme") !== null) {
+          themeMode = localStorage.getItem("data-bs-theme");
+        } else {
+          themeMode = defaultThemeMode;
+        }
+      }
+      if (themeMode === "system") {
+        themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+      }
+      document.documentElement.setAttribute("data-bs-theme", themeMode);
+    }
+  </script>
+  <script src="assets/plugins/global/plugins.bundle.js"></script>
+  <script src="assets/js/scripts.bundle.js"></script>
+    <app-root></app-root>
+</body>
+
+</html>

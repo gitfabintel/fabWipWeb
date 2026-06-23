@@ -1,0 +1,15 @@
+/* ============================================================
+   FabIntel ERP v2 — Main Stylesheet
+   Import order is critical. Use this one file.
+   ============================================================
+
+   Angular → angular.json → styles array:
+   "src/styles/fabintel-v2/fabintel.css"
+
+   Or rename to .scss and use @use / @forward.
+   ============================================================ */
+
+@import './styles/_tokens.css';
+@import './styles/_base.css';
+@import './styles/_layout.css';
+@import './styles/_components.css';

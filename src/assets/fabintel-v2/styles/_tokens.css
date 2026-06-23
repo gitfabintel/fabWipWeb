@@ -1,0 +1,148 @@
+/* ============================================================
+   FabIntel ERP v2 — Design Tokens
+   Light & Dark themes. All values in one place.
+   ============================================================ */
+
+/* ── LIGHT THEME (default) ─────────────────────────────────── */
+:root,
+[data-theme="light"] {
+
+  /* Sidebar */
+  --aside-bg:            #1e2139;   /* dark navy sidebar (same in both modes) */
+  --aside-bg-hover:      #2a2f52;
+  --aside-bg-active:     #2196f3;   /* bright blue active item */
+  --aside-border:        rgba(255,255,255,0.06);
+  --aside-text:          #a2a8c3;
+  --aside-text-active:   #ffffff;
+  --aside-label:         #5c6394;
+  --aside-width:         265px;
+  --aside-collapsed:     70px;
+  --aside-transition:    0.22s ease;
+
+  /* Topbar / Header */
+  --header-bg:           #ffffff;
+  --header-border:       #e9ecef;
+  --header-text:         #3f4254;
+  --header-height:       65px;
+
+  /* Page background & surfaces */
+  --page-bg:             #f5f8fa;
+  --surface:             #ffffff;
+  --surface2:            #f9fafb;
+  --surface-border:      #e4e6ef;
+
+  /* Text */
+  --text-primary:        #181c32;
+  --text-secondary:      #5e6278;
+  --text-muted:          #a1a5b7;
+  --text-disabled:       #cdcfda;
+
+  /* Brand / Accent */
+  --brand:               #2196f3;
+  --brand-hover:         #1976d2;
+  --brand-light:         #e3f2fd;
+  --brand-text:          #1565c0;
+
+  /* Status */
+  --success:             #50cd89;
+  --success-bg:          #e8fff3;
+  --success-text:        #47be7d;
+
+  --warning:             #ffc700;
+  --warning-bg:          #fff8dd;
+  --warning-text:        #f1bc00;
+
+  --danger:              #f1416c;
+  --danger-bg:           #fff5f8;
+  --danger-text:         #d9214e;
+
+  --info:                #2196f3;
+  --info-bg:             #e3f2fd;
+  --info-text:           #1976d2;
+
+  /* Typography */
+  --font:                'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono:           'JetBrains Mono', 'Fira Code', monospace;
+
+  --fs-xs:    11px;
+  --fs-sm:    12px;
+  --fs-base:  13px;
+  --fs-md:    14px;
+  --fs-lg:    16px;
+  --fs-xl:    18px;
+  --fs-2xl:   22px;
+
+  --fw-normal:   400;
+  --fw-medium:   500;
+  --fw-semibold: 600;
+  --fw-bold:     700;
+
+  /* Spacing */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;
+  --sp-4: 16px;  --sp-5: 20px;  --sp-6: 24px;
+  --sp-8: 32px;
+
+  /* Shape */
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-lg:   8px;
+  --radius-xl:   12px;
+  --radius-pill: 999px;
+
+  /* Shadows */
+  --shadow-xs:  0 1px 3px rgba(0,0,0,0.06);
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.08);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.12);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,0.16);
+
+  /* Transitions */
+  --t-fast: all 0.12s ease;
+  --t-base: all 0.18s ease;
+  --t-slow: all 0.28s ease;
+
+  /* Z-index */
+  --z-dropdown: 100;
+  --z-topbar:   200;
+  --z-aside:    300;
+  --z-modal:    400;
+  --z-toast:    500;
+}
+
+/* ── DARK THEME ─────────────────────────────────────────────── */
+[data-theme="dark"] {
+
+  /* Topbar / Header */
+  --header-bg:           #1e2139;
+  --header-border:       rgba(255,255,255,0.06);
+  --header-text:         #cdcfda;
+
+  /* Page background & surfaces */
+  --page-bg:             #151521;
+  --surface:             #1e2139;
+  --surface2:            #1a1f38;
+  --surface-border:      rgba(255,255,255,0.06);
+
+  /* Text */
+  --text-primary:        #eff2f5;
+  --text-secondary:      #a2a8c3;
+  --text-muted:          #5c6394;
+  --text-disabled:       #3a3f5c;
+
+  /* Brand stays same */
+  --brand:               #2196f3;
+  --brand-hover:         #42a5f5;
+  --brand-light:         rgba(33,150,243,0.15);
+  --brand-text:          #90caf9;
+
+  /* Status — darkened backgrounds */
+  --success-bg:          rgba(80,205,137,0.1);
+  --warning-bg:          rgba(255,199,0,0.1);
+  --danger-bg:           rgba(241,65,108,0.1);
+  --info-bg:             rgba(33,150,243,0.1);
+
+  /* Shadows are deeper */
+  --shadow-xs:  0 1px 3px rgba(0,0,0,0.3);
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.5);
+  --shadow-lg:  0 8px 24px rgba(0,0,0,0.6);
+}

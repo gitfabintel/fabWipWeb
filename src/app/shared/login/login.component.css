@@ -1,0 +1,7 @@
+.password-toggle-icon {
+  cursor: pointer;
+  position: absolute;
+  top: 15px;
+  right: 45px;
+  z-index: 9;
+}
