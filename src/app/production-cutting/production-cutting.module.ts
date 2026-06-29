@@ -31,6 +31,7 @@ import { RollRegisterComponent } from './cutting-master/roll-register/roll-regis
 import { PopupModule } from '@progress/kendo-angular-popup';
 import { LaySpreadingReportComponent } from './cutting-master/lay-spreading-report/lay-spreading-report.component';
 import { ScanCuttingComponent } from './scan-cutting/scan-cutting.component';
+import { CuttingDashboardComponent } from './cutting-dashboard/cutting-dashboard.component';
 
 
 
@@ -40,7 +41,8 @@ import { ScanCuttingComponent } from './scan-cutting/scan-cutting.component';
     AddEditCuttingMasterComponent,
     RollRegisterComponent,
     LaySpreadingReportComponent,
-    ScanCuttingComponent
+    ScanCuttingComponent,
+    CuttingDashboardComponent
   ],
   imports: [
        CommonModule,

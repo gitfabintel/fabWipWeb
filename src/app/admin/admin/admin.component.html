@@ -1,4 +1,288 @@
-<div class="content d-flex flex-column flex-column-fluid" id="kt_content">
+<div class="fi-page">
 
-	<h1>ADMIN WORKING</h1>
+  <ngx-spinner bdColor="rgba(0,0,0,.5)" size="medium"
+    type="ball-scale-multiple" [fullScreen]="false">
+  </ngx-spinner>
+
+  <!-- ══ TOP BAR ══════════════════════════════════════════ -->
+  <div class="dsh-topbar">
+    <div class="dsh-topbar-l">
+      <div>
+        <div class="dsh-eyebrow">Floor command</div>
+        <h1 class="dsh-heading">Production pipeline</h1>
+      </div>
+    </div>
+    <div class="dsh-legend">
+      <div class="dsh-leg" *ngFor="let s of stages" [style.--sc]="s.color">
+        <span class="dsh-ldot"></span>{{ s.stageName }}
+      </div>
+    </div>
+    <button class="fi-icon-btn" [class.dsh-spin]="loading" (click)="load()" aria-label="Refresh">
+      <i class="ti ti-refresh" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <!-- ══ STATS ════════════════════════════════════════════ -->
+  <div class="fi-stats">
+    <div class="fi-stat">
+      <div class="fi-stat-label"><i class="ti ti-packages" aria-hidden="true"></i>Orders on floor</div>
+      <div class="fi-stat-val">{{ orders.length }}</div>
+      <div class="fi-stat-sub fi-neutral">Active production orders</div>
+    </div>
+    <div class="fi-stat">
+      <div class="fi-stat-label"><i class="ti ti-stack-2" aria-hidden="true"></i>Total bundles</div>
+      <div class="fi-stat-val">{{ totalBundlesAllOrders }}</div>
+      <div class="fi-stat-sub fi-neutral">Across all orders</div>
+    </div>
+    <div class="fi-stat">
+      <div class="fi-stat-label"><i class="ti ti-tshirt" aria-hidden="true"></i>Pieces in motion</div>
+      <div class="fi-stat-val">{{ totalPcsAllOrders | number }}</div>
+      <div class="fi-stat-sub fi-neutral">Total active pieces</div>
+    </div>
+    <div class="fi-stat" [class.fi-stat-alert]="stalledCount > 0">
+      <div class="fi-stat-label"><i class="ti ti-alert-triangle" aria-hidden="true"></i>Stalled orders</div>
+      <div class="fi-stat-val" [class.fi-negative]="stalledCount > 0" [class.fi-positive]="stalledCount === 0">
+        {{ stalledCount }}
+      </div>
+      <div class="fi-stat-sub" [class.fi-negative]="stalledCount > 0" [class.fi-positive]="stalledCount === 0">
+        {{ stalledCount > 0 ? 'Requires attention' : 'All flowing normally' }}
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ BODY ═════════════════════════════════════════════ -->
+  <div class="dsh-body">
+
+    <!-- Left: order lanes -->
+    <div class="dsh-lanes">
+
+      <div class="dsh-empty" *ngIf="!loading && orders.length === 0">
+        <i class="ti ti-layout-kanban" aria-hidden="true"></i>
+        <span>No active orders on the floor</span>
+      </div>
+
+      <div class="dsh-lane-card fi-card"
+        *ngFor="let order of orders"
+        [class.dsh-card-stalled]="orderHasStall(order)"
+        (click)="openDrilldown(order)">
+
+        <div class="dsh-card-head">
+          <div class="dsh-lane-info">
+            <div class="dsh-order-no">
+             WO- {{ order.jobNumber }}
+              <span class="fi-badge fi-badge-red"   *ngIf="orderHasStall(order)">Stalled</span>
+              <span class="fi-badge fi-badge-green"  *ngIf="order.completionPct >= 100">Complete</span>
+              <span class="fi-badge fi-badge-blue"   *ngIf="!orderHasStall(order) && order.completionPct < 100">In progress</span>
+            </div>
+            <div class="dsh-meta">{{ order.customerName }} &middot; {{ order.styleName }} &middot; {{ order.colorName }} &middot; {{ order.productionCuttingHeaderNumber }}</div>
+          </div>
+          <div class="dsh-right">
+            <span class="dsh-pcs">{{ order.totalPcs | number }} pcs</span>
+            <span class="dsh-pct"
+              [class.fi-positive]="order.completionPct >= 100"
+              [class.fi-negative]="orderHasStall(order)"
+              [class.fi-neutral]="!orderHasStall(order) && order.completionPct < 100">
+              {{ order.completionPct }}% complete
+            </span>
+            <i class="ti ti-chevron-right dsh-chevron" aria-hidden="true"></i>
+          </div>
+        </div>
+
+        <!-- Conveyor -->
+        <div class="dsh-conveyor-wrap">
+          <div class="dsh-conveyor">
+            <div class="dsh-seg"
+              *ngFor="let seg of order.stageBreakdown"
+              [style.flex-grow]="getSegmentWeight(seg, order)"
+              [style.background]="seg.bundleCount > 0 ? seg.color : 'transparent'"
+              [class.dsh-seg-empty]="seg.bundleCount === 0"
+              [class.dsh-seg-stalled]="isStalled(seg, order)"
+              [title]="seg.stageName + ': ' + seg.bundleCount + ' bundles'">
+              <span class="dsh-seg-lbl" *ngIf="seg.bundleCount > 0">{{ seg.pct }}%</span>
+            </div>
+          </div>
+          <div class="dsh-codes">
+            <span class="dsh-code"
+              *ngFor="let seg of order.stageBreakdown"
+              [style.flex-grow]="getSegmentWeight(seg, order)">
+              {{ seg.stageCode }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Top segments as bars -->
+        <div class="dsh-bars-section" *ngIf="getTopSegments(order).length > 0">
+          <div class="dsh-bar-row" *ngFor="let seg of getTopSegments(order)">
+            <span class="dsh-bar-lbl">{{ seg.stageName }}</span>
+            <div class="dsh-bar-track">
+              <div class="dsh-bar-fill" [style.width.%]="seg.pct" [style.background]="seg.color"></div>
+            </div>
+            <span class="dsh-bar-val" [class.fi-negative]="isStalled(seg, order)">
+              {{ seg.pcsCount | number }} pcs
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Right panel -->
+    <div class="dsh-right-panel">
+
+      <!-- Donut chart -->
+      <div class="fi-card">
+        <div class="fi-card-header">
+          <span class="fi-card-title"><i class="ti ti-chart-donut" aria-hidden="true"></i>Stage distribution</span>
+        </div>
+        <div class="fi-card-body">
+          <div style="position:relative;height:150px">
+            <canvas #dshDonut role="img" aria-label="Donut chart showing pieces distributed across production stages">
+            </canvas>
+          </div>
+          <div class="dsh-chart-legend">
+            <span class="dsh-clg" *ngFor="let s of stages">
+              <span class="dsh-clg-sq" [style.background]="s.color"></span>
+              {{ s.stageName }} {{ getStagePct(s.id) }}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Bundles per stage -->
+      <div class="fi-card">
+        <div class="fi-card-header">
+          <span class="fi-card-title"><i class="ti ti-stack-2" aria-hidden="true"></i>Bundles per stage</span>
+        </div>
+        <div class="fi-card-body" style="padding-top:8px">
+          <table class="dsh-stage-table">
+            <tr *ngFor="let s of stages">
+              <td><span class="dsh-sdot" [style.background]="s.color"></span>{{ s.stageName }}</td>
+              <td class="right" style="color:var(--fi-text-secondary)">{{ getStageBundles(s.id) }}</td>
+              <td style="width:68px;padding-left:8px">
+                <div class="dsh-sbar-track">
+                  <div class="dsh-sbar-fill" [style.width.%]="getStagePct(s.id)" [style.background]="s.color"></div>
+                </div>
+              </td>
+              <td class="right dsh-pct-cell">{{ getStagePct(s.id) }}%</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+
+      <!-- Stall alerts -->
+      <div class="fi-card" *ngIf="stalledCount > 0" style="border-color:#fca5a5">
+        <div class="fi-card-header">
+          <span class="fi-card-title" style="color:#dc2626">
+            <i class="ti ti-alert-triangle" aria-hidden="true"></i>Stall alert
+          </span>
+        </div>
+        <div class="fi-card-body" style="display:flex;flex-direction:column;gap:6px">
+          <div class="dsh-stall-row" *ngFor="let order of stalledOrders">
+            <span class="fi-negative" style="font-weight:600">{{ order.productionCuttingHeaderNumber }}</span>
+            <span style="color:var(--fi-text-secondary)">{{ getStalledStage(order) }}</span>
+            <span class="fi-negative" style="font-weight:600">{{ getStalledPct(order) }}% stuck</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order completion -->
+      <div class="fi-card">
+        <div class="fi-card-header">
+          <span class="fi-card-title"><i class="ti ti-trending-up" aria-hidden="true"></i>Completion</span>
+        </div>
+        <div class="fi-card-body" style="display:flex;flex-direction:column;gap:7px">
+          <div class="dsh-bar-row" *ngFor="let order of orders">
+            <span class="dsh-bar-lbl">{{ order.productionCuttingHeaderNumber | slice:8 }}</span>
+            <div class="dsh-bar-track">
+              <div class="dsh-bar-fill"
+                [style.width.%]="order.completionPct"
+                [style.background]="order.completionPct>=100 ? '#16a34a' : orderHasStall(order) ? '#dc2626' : '#2563eb'">
+              </div>
+            </div>
+            <span class="dsh-bar-val"
+              [class.fi-positive]="order.completionPct >= 100"
+              [class.fi-negative]="orderHasStall(order)"
+              [class.fi-neutral]="!orderHasStall(order) && order.completionPct < 100">
+              {{ order.completionPct }}%
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 7-day throughput chart -->
+      <div class="fi-card">
+        <div class="fi-card-header">
+          <span class="fi-card-title"><i class="ti ti-clock" aria-hidden="true"></i>7-day throughput</span>
+        </div>
+        <div class="fi-card-body">
+          <div style="position:relative;height:120px">
+            <canvas #dshBar role="img" aria-label="Bar chart showing daily bundle throughput over the last 7 days">
+            </canvas>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ══ DRILL-DOWN ════════════════════════════════════════ -->
+  <div class="dsh-overlay" *ngIf="drilldownOrder" (click)="closeDrilldown()">
+    <div class="fi-card dsh-panel" (click)="$event.stopPropagation()">
+
+      <div class="fi-card-header" style="padding:16px 20px">
+        <div>
+          <div class="fi-cell-muted fi-text-sm" style="margin-bottom:3px">
+            {{ drilldownOrder.customerName }} &middot; {{ drilldownOrder.styleName }}
+          </div>
+          <h2 style="font-size:17px;font-weight:600;color:var(--fi-text-primary);margin:0">
+            {{ drilldownOrder.productionCuttingHeaderNumber }}
+          </h2>
+        </div>
+        <button class="fi-icon-btn fi-icon-btn-danger" (click)="closeDrilldown()" aria-label="Close">
+          <i class="ti ti-x" aria-hidden="true"></i>
+        </button>
+      </div>
+
+      <div class="dsh-filter-row">
+        <button class="dsh-pill" [class.dsh-pill-on]="drilldownFilter===null" (click)="setDrilldownFilter(null)">
+          All ({{ drilldownBundles.length }})
+        </button>
+        <button class="dsh-pill"
+          *ngFor="let s of stages"
+          [class.dsh-pill-on]="drilldownFilter===s.id"
+          [style.--pc]="s.color"
+          (click)="setDrilldownFilter(s.id)">
+          {{ s.stageName }} ({{ getStageCount(s.id) }})
+        </button>
+      </div>
+
+      <div class="dsh-panel-body">
+        <table class="fi-table">
+          <thead>
+            <tr>
+              <th>B#</th><th>Section</th><th>Size</th>
+              <th>Numbering</th><th class="right">Pcs</th><th>Barcode</th><th>Stage</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let b of filteredDrilldownBundles">
+              <td style="color:var(--fi-accent);font-weight:600">{{ b.bundleNo }}</td>
+              <td>{{ b.sectionName }}</td>
+              <td class="fi-cell-primary">{{ b.sizeName }}</td>
+              <td class="fi-cell-muted">{{ b.fromNumber }}/{{ b.toNumber }}</td>
+              <td class="right">{{ b.totalQty }}</td>
+              <td class="fi-cell-muted fi-text-xs">{{ b.barcode }}</td>
+              <td>
+                <span class="dsh-stage-chip" [style.--cc]="b.currentStageColor">
+                  {{ b.currentStageName }}
+                </span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
 </div>

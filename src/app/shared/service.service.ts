@@ -16,10 +16,17 @@ const EXCEL_TYPE =
 
 import * as FileSaver from 'file-saver';
 import * as XLSX from 'xlsx';
-import { forkJoin, map } from 'rxjs';
+import { forkJoin, map, Observable } from 'rxjs';
 import { Workbook } from 'exceljs';
 import * as fs from 'file-saver';
-
+import {
+  CuttingDashboardData,
+  CuttingDashboardSummary,
+  MarkerEfficiency,
+  CutStatusCount,
+  CuttingJob,
+  WastageByDay,
+} from '../production-cutting/cutting-dashboard/cutting-dashboard';
 @Injectable({
   providedIn: 'root',
 })
@@ -176,6 +183,15 @@ return forkJoin([api1, api2]).pipe(
       })
     );
   }
+
+ getDashboard(): Observable<CuttingDashboardData> {
+  return this.http
+    .get<{ success: boolean; data: CuttingDashboardData; message: string }>(
+      `${environment.apiUrl}/api/ProductionCutting/GetCuttingDashboard`
+    )
+    .pipe(map(res => res.data));
+}
+
   GetYears() {
     return this.http.get(`${environment.apiUrl}/api/Lookup/GetYears`);
   }

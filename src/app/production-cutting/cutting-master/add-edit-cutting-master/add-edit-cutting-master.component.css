@@ -1,182 +1,102 @@
-/* ── sticky column helpers ── */
-.c-th-sticky {
-  position: sticky;
-  z-index: 3;
-  background: #1e293b;
-  color: #fff;
-  text-align: center;
-  padding: 9px 4px;
+/* =========================================================
+   add-edit-cutting-master.component.css
+   Only layout unique to this form — all reusable classes
+   are in styles.css as fi-* utilities.
+   ========================================================= */
+
+/* ── Two-column layout ───────────────────────────────────── */
+.ae-two-col {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  gap: 16px;
+  align-items: start;
+}
+
+.ae-left  { display: flex; flex-direction: column; gap: 16px; }
+.ae-right { min-width: 0; }
+
+/* ── Job info chips ──────────────────────────────────────── */
+.ae-job-row {
+  display: flex;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.ae-chips {
+  display: flex;
+  flex: 1;
+  border: 1px dashed var(--fi-border);
+  border-radius: 8px;
+  overflow: hidden;
+  flex-wrap: wrap;
+}
+
+.ae-chip {
+  flex: 1;
+  min-width: 110px;
+  padding: 10px 14px;
+  border-right: 1px solid var(--fi-border);
+}
+
+.ae-chip:last-child { border-right: none; }
+.ae-chip-muted  { background: var(--fi-bg); flex: 0 0 110px; }
+.ae-chip-green  { background: #f0fdf4; flex: 0 0 150px; }
+
+.ae-chip-label {
   font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .4px;
-  text-transform: uppercase;
-  border: 1px solid #334155;
-  white-space: nowrap;
-}
-
-.c-th-meta {
-  background: #1e293b;
-  color: #fff;
-  text-align: center;
-  padding: 9px 4px;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: .4px;
-  text-transform: uppercase;
-  border: 1px solid #334155;
-  white-space: nowrap;
-}
-
-.c-td-sticky {
-  position: sticky;
-  z-index: 2;
-  padding: 5px 3px;
-  border: 1px solid #e2e8f0;
-}
-
-.c-label-sticky {
-  position: sticky;
-  left: 0;
-  z-index: 2;
-}
-
-/* ── qty input ── */
-.c-qty-input {
-  width: 34px;
-  height: 28px;
-  border: 1px solid;
-  border-radius: 4px;
-  text-align: center;
-  font-size: 11px;
   font-weight: 600;
-  padding: 0;
-  background: transparent;
-  outline: none;
-  transition: box-shadow .1s;
-}
-.c-qty-input:focus {
-  box-shadow: 0 0 0 2px rgba(37,99,235,.3);
-}
-.c-qty-input::-webkit-inner-spin-button,
-.c-qty-input::-webkit-outer-spin-button { opacity: 1; }
-
-/* ── meta input ── */
-.c-meta-input {
-  height: 28px;
-  border: 1px solid #e2e8f0;
-  border-radius: 4px;
-  text-align: center;
-  font-size: 11px;
-  padding: 0 4px;
-  background: transparent;
-  outline: none;
-  transition: border-color .1s;
-}
-.c-meta-input:focus { border-color: #93c5fd; }
-.c-meta-input::-webkit-inner-spin-button,
-.c-meta-input::-webkit-outer-spin-button { opacity: 1; }
-
-/* ── table base ── */
-.cutting-table {
-  border-collapse: collapse;
-  font-size: 12px;
-  white-space: nowrap;
-}
-.cutting-table td,
-.cutting-table th { vertical-align: middle; }
-.style-banner {
-  span {
-    font-size: 10px;
-    font-weight: 700;
-    letter-spacing: 0.5px;
-    color: #64748b;
-    margin-bottom: 2px;
-  }
-  strong {
-    font-size: 13px;
-  }
+  color: var(--fi-text-muted);
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  margin-bottom: 3px;
 }
 
-.clickable-section-card {
-  border: 1px solid #e2e8f0;
-  border-radius: 6px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.01);
+.ae-chip-val  { font-size: 13px; font-weight: 600; color: var(--fi-text-primary); }
+.ae-chip-lg   { font-size: 18px; }
+.ae-chip-sub  { font-size: 11px; font-weight: 400; color: var(--fi-text-muted); margin-left: 4px; }
+
+/* ── Section list ────────────────────────────────────────── */
+.ae-section-list { display: flex; flex-direction: column; gap: 10px; }
+
+.ae-section-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: var(--fi-surface);
+  border-radius: 8px;
+  border: 1px solid var(--fi-border);
+  border-left: 4px solid transparent;
   cursor: pointer;
-  transition: all 0.15s ease-in-out;
-
-  &:hover {
-    transform: translateX(4px);
-    border-color: #cbd5e1;
-  }
+  transition: box-shadow var(--fi-transition);
 }
 
-.active-section-tab {
-  background-color: #eff6ff !important;
-  border-color: #bfdbfe !important;
-  box-shadow: 0 2px 4px rgba(37,99,235,0.06) !important;
+.ae-section-item:hover { box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+
+.ae-section-active {
+  border-color: var(--fi-accent);
+  box-shadow: 0 0 0 2px rgba(37,99,235,.1);
 }
 
-/* Tabular Grid Densities */
-.summary-layout-table, .matrix-input-table {
-  th {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 0.3px;
-    padding: 8px 6px !important;
-    vertical-align: middle;
-  }
-  td {
-    font-size: 12px;
-    padding: 6px !important;
-    vertical-align: middle;
-  }
+/* ── Section heading in lay matrix header ────────────────── */
+.ae-section-header  { flex-wrap: wrap; gap: 10px; }
+
+.ae-section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-/* Input Fields Isolation */
-.table-inline-input {
-  width: 100%;
-  height: 26px;
-  border: 1px solid transparent;
-  background: transparent;
-  text-align: center;
-  font-size: 12px;
-  border-radius: 4px;
-  outline: none;
-  transition: all 0.1s ease;
-
-  &:focus, &:hover {
-    background: #ffffff;
-    border-color: #cbd5e1;
-    box-shadow: inset 0 1px 2px rgba(0,0,0,0.03);
-  }
+.ae-section-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
-.matrix-cell-input {
-  width: 50px;
-  height: 26px;
-  border: 1px solid #cbd5e1;
-  border-radius: 4px;
-  text-align: center;
-  font-size: 12px;
-  font-weight: 600;
-  color: #0f172a;
-  background: #ffffff;
-  outline: none;
-  margin: 0 auto;
-  display: block;
-
-  &:focus {
-    border-color: #2563eb;
-    box-shadow: 0 0 0 2px rgba(37,99,235,0.15);
-  }
-
-  /* Clear default spinners inside matrix views */
-  &::-webkit-outer-spin-button,
-  &::-webkit-inner-spin-button {
-    -webkit-appearance: none;
-    margin: 0;
-  }
-  &[type=number] {
-    -moz-appearance: textfield;
-  }
+/* ── Responsive ──────────────────────────────────────────── */
+@media (max-width: 1024px) {
+  .ae-two-col { grid-template-columns: 1fr; }
 }

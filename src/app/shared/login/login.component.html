@@ -1,152 +1,165 @@
-<!-- Login page sits outside layout — no sidebar/header -->
-<div class="d-flex flex-column flex-root" style="height: 100vh !important;">
-  <div class="d-flex flex-column flex-lg-row flex-column-fluid">
+<div class="fi-login-shell">
 
-    <!-- Left: Form Side -->
-    <div class="d-flex flex-column flex-lg-row-fluid w-lg-50 p-10 order-2 order-lg-1">
-      <div class="d-flex flex-center flex-column flex-lg-row-fluid">
-        <div class="w-lg-500px p-10">
+  <!-- ═══════ LEFT — Form ═══════ -->
+  <div class="fi-login-left">
 
-          <!-- Logo -->
-          <div class="text-center mb-11">
-            <a href="#">
-              <img src="assets/fabicon-1.png" class="h-60px mb-5" alt="Fab WIP" />
-            </a>
-            <h1 class="text-dark fw-bolder mb-3">Sign In to Fab WIP</h1>
-            <div class="text-gray-500 fw-semibold fs-6">
-              Enter your credentials to continue
-            </div>
-          </div>
-
-          <!-- Spinner -->
-          <ngx-spinner
-            bdColor="rgba(0,0,0,0.8)"
-            size="medium"
-            color="#fff"
-            type="ball-scale-multiple"
-            [fullScreen]="false">
-            <p style="color:white">Loading...</p>
-          </ngx-spinner>
-
-          <!-- Sign In Form -->
-          <form novalidate #loginForm="ngForm" (ngSubmit)="onSubmit()">
-
-            <!-- Username -->
-            <div class="fv-row mb-8">
-              <input
-                type="email"
-                class="form-control bg-transparent"
-                placeholder="Email / Username"
-                name="loginName"
-                #loginName="ngModel"
-                [(ngModel)]="data.loginName"
-                autocomplete="off"
-                required
-                [ngClass]="{
-                  'is-valid': loginName.valid && loginName.touched,
-                  'is-invalid': loginName.invalid && loginName.touched
-                }"
-              />
-              <div *ngIf="loginName.touched && loginName.errors?.['required']"
-                class="fv-plugins-message-container invalid-feedback">
-                Username is required
-              </div>
-            </div>
-
-            <!-- Password -->
-            <div class="fv-row mb-3" style="position:relative">
-              <input
-                [type]="passwordFieldType"
-                class="form-control bg-transparent"
-                placeholder="Password"
-                name="password"
-                #password="ngModel"
-                [(ngModel)]="data.password"
-                autocomplete="off"
-                required
-                [ngClass]="{
-                  'is-valid': password.valid && password.touched,
-                  'is-invalid': password.invalid && password.touched
-                }"
-              />
-              <!-- Eye toggle -->
-              <span
-                (click)="togglePasswordVisibility()"
-                style="position:absolute;right:16px;top:50%;transform:translateY(-50%);cursor:pointer;color:#a1a5b7">
-                <i class="fa-solid fs-4"
-                  [ngClass]="{
-                    'fa-eye': !isPasswordVisible,
-                    'fa-eye-slash': isPasswordVisible
-                  }">
-                </i>
-              </span>
-              <div *ngIf="password.touched && password.errors?.['required']"
-                class="fv-plugins-message-container invalid-feedback">
-                Password is required
-              </div>
-            </div>
-
-            <!-- Remember + Forgot -->
-            <div class="d-flex flex-stack flex-wrap gap-3 fs-base fw-semibold mb-8">
-              <label class="form-check form-check-custom form-check-solid">
-                <input class="form-check-input" type="checkbox" name="remember" />
-                <span class="form-check-label text-gray-700 fw-semibold fs-7">
-                  Remember me
-                </span>
-              </label>
-              <a href="javascript:;" class="link-primary">Forgot Password?</a>
-            </div>
-
-            <!-- Submit -->
-            <div class="d-grid mb-10">
-              <button
-                type="submit"
-                class="btn btn-primary"
-                [disabled]="loginForm.invalid">
-                <span class="indicator-label">Sign In</span>
-              </button>
-            </div>
-
-          </form>
-
-        </div>
-      </div>
-
-      <!-- Footer links -->
-      <div class="w-lg-500px d-flex flex-stack px-10 mx-auto">
-        <div class="d-flex fw-semibold text-primary fs-base gap-5">
-          <a href="javascript:;">Terms</a>
-          <a href="javascript:;">Contact Us</a>
-        </div>
+    <!-- Logo -->
+    <div class="fi-logo-row">
+      <div class="fi-logo-mark">Fi</div>
+      <div class="fi-logo-name">
+        Fab<span class="fi-blue">Ind</span>
+        <span class="fi-erp-tag">WIP</span>
       </div>
     </div>
-    <!-- End Left -->
 
-    <!-- Right: Background / Branding Side -->
-    <div class="d-flex flex-lg-row-fluid w-lg-50 bgi-size-cover bgi-position-center order-1 order-lg-2"
-      style="background-image: url(assets/media/misc/auth-bg.png)">
-      <div class="d-flex flex-column flex-center py-7 py-lg-15 px-5 px-md-15 w-100">
+    <h1 class="fi-welcome">Welcome back</h1>
+    <p class="fi-sub">Sign in to your account to continue</p>
 
-        <img
-          alt="FabIntel Logo"
-          src="assets/FabIndustries-logo.png"
-          class="h-60px h-lg-75px mb-10" />
-
-        <img
-          class="d-none d-lg-block mx-auto w-275px w-md-50 w-xl-450px mb-10"
-          src="assets/media/misc/auth-screens.png"
-          alt="" />
-
-        <h1 class="d-none d-lg-block text-white fs-2qx fw-bolder text-center mb-7">
-          Fabl WIP — Garment Manufacturing ERP
-        </h1>
-        <div class="d-none d-lg-block text-white fs-base text-center">
-          Garment Manufacturing — Cutting · Bundles · Floor · QC · Dispatch
-        </div>
-
-      </div>
+    <!-- Error banner -->
+    <div class="fi-error-banner" *ngIf="errorMessage">
+      <i class="ti ti-alert-circle" aria-hidden="true"></i>
+      {{ errorMessage }}
     </div>
-    <!-- End Right -->
+
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" novalidate>
+
+      <!-- loginName -->
+      <div class="fi-field">
+        <label class="fi-label" for="loginName">loginName</label>
+        <div class="fi-input-wrap">
+          <i class="ti ti-user fi-input-icon" aria-hidden="true"></i>
+          <input
+            id="loginName"
+            class="fi-input"
+            [class.fi-input-error]="loginName.invalid && loginName.touched"
+            type="text"
+            formControlName="loginName"
+            placeholder="Enter your loginName"
+            autocomplete="loginName"
+          />
+        </div>
+        <span class="fi-field-error" *ngIf="loginName.invalid && loginName.touched">
+          loginName is required
+        </span>
+      </div>
+
+      <!-- Password -->
+      <div class="fi-field">
+        <label class="fi-label" for="password">Password</label>
+        <div class="fi-input-wrap">
+          <i class="ti ti-lock fi-input-icon" aria-hidden="true"></i>
+          <input
+            id="password"
+            class="fi-input fi-input-pr"
+            [class.fi-input-error]="password.invalid && password.touched"
+            [type]="showPassword ? 'text' : 'password'"
+            formControlName="password"
+            placeholder="Enter your password"
+            autocomplete="current-password"
+          />
+          <button
+            type="button"
+            class="fi-eye-btn"
+            (click)="togglePassword()"
+            [attr.aria-label]="showPassword ? 'Hide password' : 'Show password'"
+          >
+            <i class="ti" [class.ti-eye]="!showPassword" [class.ti-eye-off]="showPassword" aria-hidden="true"></i>
+          </button>
+        </div>
+        <span class="fi-field-error" *ngIf="password.invalid && password.touched">
+          Password is required
+        </span>
+      </div>
+
+      <!-- Remember + Forgot -->
+      <div class="fi-options-row">
+        <label class="fi-check-label">
+          <input type="checkbox" formControlName="remember" />
+          Keep me signed in
+        </label>
+        <a routerLink="/forgot-password" class="fi-forgot">Forgot password?</a>
+      </div>
+
+      <!-- Submit -->
+      <button type="submit" class="fi-btn" [disabled]="isLoading">
+        <ng-container *ngIf="isLoading">
+          <i class="ti ti-loader-2 fi-spin" aria-hidden="true"></i>
+          Signing in…
+        </ng-container>
+        <ng-container *ngIf="!isLoading">
+          <i class="ti ti-login" aria-hidden="true"></i>
+          Sign in
+        </ng-container>
+      </button>
+
+    </form>
+
+    <p class="fi-help-note">
+      Having trouble? <a href="mailto:it@fabindustries.com">Contact IT support</a>
+    </p>
 
   </div>
+
+  <!-- ═══════ RIGHT — Brand panel ═══════ -->
+  <div class="fi-login-right">
+
+    <div class="fi-grid-overlay"></div>
+
+    <div class="fi-brand-panel">
+
+      <svg class="fi-illustration" width="260" height="200" viewBox="0 0 260 200" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="20" y="140" width="220" height="40" rx="6" fill="rgba(37,99,235,0.12)" stroke="rgba(37,99,235,0.25)" stroke-width="1"/>
+        <rect x="36" y="100" width="52" height="44" rx="5" fill="rgba(37,99,235,0.2)" stroke="rgba(96,165,250,0.4)" stroke-width="1"/>
+        <rect x="46" y="110" width="32" height="20" rx="3" fill="rgba(37,99,235,0.3)"/>
+        <circle cx="62" cy="108" r="4" fill="#60a5fa" opacity=".7"/>
+        <rect x="50" y="144" width="24" height="8" rx="2" fill="rgba(37,99,235,0.25)"/>
+        <rect x="104" y="82" width="52" height="62" rx="5" fill="rgba(37,99,235,0.18)" stroke="rgba(96,165,250,0.35)" stroke-width="1"/>
+        <rect x="114" y="92" width="32" height="28" rx="3" fill="rgba(37,99,235,0.28)"/>
+        <circle cx="130" cy="90" r="4" fill="#34d399" opacity=".8"/>
+        <rect x="110" y="124" width="12" height="6" rx="1" fill="rgba(96,165,250,0.4)"/>
+        <rect x="126" y="124" width="12" height="6" rx="1" fill="rgba(96,165,250,0.4)"/>
+        <rect x="108" y="144" width="36" height="8" rx="2" fill="rgba(37,99,235,0.25)"/>
+        <rect x="172" y="108" width="52" height="36" rx="5" fill="rgba(37,99,235,0.2)" stroke="rgba(96,165,250,0.4)" stroke-width="1"/>
+        <rect x="182" y="116" width="32" height="16" rx="3" fill="rgba(37,99,235,0.3)"/>
+        <circle cx="188" cy="114" r="3" fill="#f59e0b" opacity=".8"/>
+        <circle cx="196" cy="114" r="3" fill="#60a5fa" opacity=".6"/>
+        <rect x="176" y="144" width="40" height="8" rx="2" fill="rgba(37,99,235,0.25)"/>
+        <line x1="88" y1="155" x2="104" y2="155" stroke="rgba(96,165,250,0.3)" stroke-width="2" stroke-dasharray="3 3"/>
+        <line x1="156" y1="155" x2="172" y2="155" stroke="rgba(96,165,250,0.3)" stroke-width="2" stroke-dasharray="3 3"/>
+        <ellipse cx="66" cy="72" rx="12" ry="6" fill="rgba(96,165,250,0.25)" stroke="rgba(96,165,250,0.4)" stroke-width="1"/>
+        <rect x="54" y="50" width="24" height="22" rx="2" fill="rgba(96,165,250,0.15)" stroke="rgba(96,165,250,0.3)" stroke-width="1"/>
+        <ellipse cx="66" cy="50" rx="12" ry="5" fill="rgba(96,165,250,0.3)" stroke="rgba(96,165,250,0.4)" stroke-width="1"/>
+        <rect x="188" y="48" width="10" height="28" rx="2" fill="rgba(37,99,235,0.35)"/>
+        <rect x="202" y="38" width="10" height="38" rx="2" fill="rgba(37,99,235,0.5)"/>
+        <rect x="216" y="54" width="10" height="22" rx="2" fill="rgba(37,99,235,0.35)"/>
+        <rect x="230" y="32" width="10" height="44" rx="2" fill="#2563eb" opacity=".7"/>
+        <line x1="184" y1="78" x2="244" y2="78" stroke="rgba(96,165,250,0.2)" stroke-width="1"/>
+        <circle cx="148" cy="40" r="2.5" fill="#60a5fa" opacity=".5"/>
+        <circle cx="160" cy="56" r="1.5" fill="#34d399" opacity=".4"/>
+        <circle cx="32" cy="80" r="2" fill="#60a5fa" opacity=".3"/>
+      </svg>
+
+      <h2 class="fi-brand-title">
+        Garment manufacturing,<br><span>intelligently managed</span>
+      </h2>
+      <p class="fi-brand-desc">
+        From fabric procurement to final cut — FabIntel gives your team real-time visibility across every stage of production.
+      </p>
+
+      <div class="fi-pills">
+        <span class="fi-pill"><i class="ti ti-cut" aria-hidden="true"></i> Cutting</span>
+        <span class="fi-pill"><i class="ti ti-building-warehouse" aria-hidden="true"></i> Procurement</span>
+        <span class="fi-pill"><i class="ti ti-robot" aria-hidden="true"></i> Production Floor</span>
+        <span class="fi-pill"><i class="ti ti-chart-bar" aria-hidden="true"></i> Reports</span>
+      </div>
+
+      <div class="fi-brand-stats">
+        <div class="fi-bstat"><div class="fi-bstat-val">100%</div><div class="fi-bstat-label">Digital</div></div>
+        <div class="fi-bstat"><div class="fi-bstat-val">Live</div><div class="fi-bstat-label">Tracking</div></div>
+        <div class="fi-bstat"><div class="fi-bstat-val">0</div><div class="fi-bstat-label">Paper</div></div>
+      </div>
+
+    </div>
+  </div>
+
 </div>

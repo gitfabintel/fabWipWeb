@@ -41,6 +41,8 @@ public gridView: unknown[] = [];
 public gridData: any[] = [];
   columns: any = [];
   // temp: any = [];
+  menuTop  = 0;
+menuLeft = 0;
   image : any;
   image2 : any;
   response: any;
@@ -1284,11 +1286,45 @@ generateBarcode(value: string): string {
   JsBarcode(canvas, value, {
     format: 'CODE39',      // or CODE128
     displayValue: false,   // true if you want text below barcode
-    width: 1.2,
-    height: 22,
+    width: 2,
+    height: 50,
     margin: 0
   });
 
   return canvas.toDataURL('image/png');
+}
+
+toggleMenu(event: MouseEvent, row: any): void {
+  event.stopPropagation();
+  const isOpen = row._menuOpen;
+ 
+  // Close all first
+  (this.gridView as any[]).forEach((r: any) => r._menuOpen = false);
+ 
+  if (!isOpen) {
+    const btn  = event.currentTarget as HTMLElement;
+    const rect = btn.getBoundingClientRect();
+    const menuWidth = 215;
+ 
+    // Position below button, right-aligned
+    this.menuTop  = rect.bottom + 4;
+    this.menuLeft = rect.right - menuWidth;
+ 
+    // If too close to bottom, flip upward
+    const estimatedMenuHeight = 320;
+    if (rect.bottom + estimatedMenuHeight > window.innerHeight) {
+      this.menuTop = rect.top - estimatedMenuHeight - 4;
+    }
+ 
+    row._menuOpen = true;
+  }
+}
+ 
+hasOpenMenu(): boolean {
+  return (this.gridView as any[]).some((row: any) => row._menuOpen);
+}
+ 
+closeAllMenus(): void {
+  (this.gridView as any[]).forEach((row: any) => row._menuOpen = false);
 }
 }

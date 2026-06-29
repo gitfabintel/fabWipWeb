@@ -25,9 +25,8 @@
               "src/assets"
             ],
             "styles": [
-              "src/assets/plugins/global/plugins.bundle.css",
-              "src/assets/css/default-table-main.css",
-              "src/assets/css/style.bundle.css",
+              "node_modules/@tabler/icons-webfont/dist/tabler-icons.min.css",
+              "src/assets/default-table-main.css",
               "src/styles.css",
               "node_modules/ngx-spinner/animations/ball-scale-multiple.css"
             ],

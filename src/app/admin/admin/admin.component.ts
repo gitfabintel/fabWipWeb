@@ -1,5 +1,5 @@
 import { HttpClient } from '@angular/common/http';
-import { Component } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { Router } from '@angular/router';
 import { NgxSpinnerService } from 'ngx-spinner';
 import { ToastrService } from 'ngx-toastr';
@@ -7,63 +7,63 @@ import { AuthSystemService } from 'src/app/shared/auth/auth.system.service';
 import { Dateformater } from 'src/app/shared/dateformater';
 import { ServiceService } from 'src/app/shared/service.service';
 import { environment } from 'src/environments/environment';
-import { orderBy, process } from '@progress/kendo-data-query';
 import Swal from 'sweetalert2';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
-
-import {SignalRService} from '../../shared/SignalR.service'
-import jwt_decode from 'jwt-decode';
+import { SignalRService } from '../../shared/SignalR.service';
 import { combineLatest, forkJoin, map, Observable } from 'rxjs';
 import { Store } from '@ngrx/store';
 import { Permission } from 'src/app/permission/permission.model';
 import { selectPermissionByMenu } from 'src/app/permission/permission.selectors';
-
+import { Chart, registerables } from 'chart.js';
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-admin',
   templateUrl: './admin.component.html',
   styleUrls: ['./admin.component.css']
 })
-export class AdminComponent {
-   gridView: any= [];
-   gridData: any[] = [];
+export class AdminComponent implements OnInit, OnDestroy {
 
+  // ── Chart canvas refs ─────────────────────────────────────
+  @ViewChild('dshDonut') dshDonut!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('dshBar')   dshBar!:   ElementRef<HTMLCanvasElement>;
 
-dataBom:any
-historyBom:any=[]
+  private donutChart?: Chart;
+  private barChart?:   Chart;
 
-
-
+  // ── Legacy fields (kept as-is) ────────────────────────────
+  gridView: any = [];
+  gridData: any[] = [];
+  dataBom: any;
+  historyBom: any = [];
   loadingIndicator = true;
   Count: any;
-  response:any
-
-  data:any
-
+  response: any;
+  data: any;
   Url = '/api/Report/GetTop10Jobs';
   dateformater: Dateformater = new Dateformater();
-searchText = '';
+  searchText = '';
   selectedStatus = '';
   selectedType = '';
-role: any;
+  role: any;
+  filteredData: any = [];
+  activities: any[] = [];
+  listprsFilter: any = [];
+  jobSummaries: any = [];
+  pRCanSignOff$!: Observable<boolean>;
+  pRCanCheck$!:   Observable<boolean>;
+  pRCanView$!:    Observable<boolean>;
+  newdata: any;
 
-filteredData :any= [];
-activities: any[] = [];
-listprsFilter: any = [];
-  jobSummaries:any=[]
-   pRCanSignOff$!: Observable<boolean>;
+  // ── Pipeline ──────────────────────────────────────────────
+  loading    = false;
+  stages:    any[] = [];
+  orders:    any[] = [];
+  drilldownOrder:   any = null;
+  drilldownBundles: any[] = [];
+  drilldownFilter:  number | null = null;
+  STALL_PCT_THRESHOLD = 60;
 
-  //  canSignOff$!: Observable<boolean>;
-
-    pRCanCheck$!: Observable<boolean>;
-
-
-
-   //canview
-     pRCanView$!: Observable<boolean>;
-   
-   newdata:any
- 
   constructor(
     private http: HttpClient,
     private toastr: ToastrService,
@@ -71,163 +71,233 @@ listprsFilter: any = [];
     private router: Router,
     private serviceSystem: AuthSystemService,
     private service: ServiceService,
-     public signalRService: SignalRService,
-     private store: Store,
- private modalService: NgbModal,
+    public signalRService: SignalRService,
+    private store: Store,
+    private modalService: NgbModal,
+    private cdr: ChangeDetectorRef,
   ) {
-       this.signalRService.eventCallback$.subscribe(value => {
-         this.newdata =value;
-       
-        if (this.newdata && this.newdata.length > 0) {
-          
-           this.loadDashboardDataSi();
-        }
-        console.log(value); 
+    this.signalRService.eventCallback$.subscribe(value => {
+      this.newdata = value;
+      if (this.newdata && this.newdata.length > 0) {}
+      console.log(value);
     });
-
-    this.pRCanSignOff$ = this.getPermission('PR Dashboard Item', 'signOff');
-
-
-//can check
-  this.pRCanCheck$ = this.getPermission('PR Dashboard Item', 'canCheck');
-
-
-
-//can view
-  this.pRCanView$ = this.getPermission('PR Dashboard Item', 'canRead');
-
   }
 
+  // ── Lifecycle ─────────────────────────────────────────────
   ngOnInit(): void {
-      this.signalRService.startConnection();
-    this.signalRService.addTransferChartDataListener();
-     this.role = this.serviceSystem.getRole();
-    
-    // this.service.fetch((data: any) => {
-    //   this.gridView = data;
-    //   this.gridData = [...data];
-    //   this.loadingIndicator = false;
-
-    //   this.Count = this.gridView.length;
-    // }, this.Url);
-      this.loadDashboardData();
+    this.load();
   }
 
-  loadDashboardData() {
+  ngOnDestroy(): void {
+    this.donutChart?.destroy();
+    this.barChart?.destroy();
+  }
 
+  // ── Load ──────────────────────────────────────────────────
+  load(): void {
+    this.loading = true;
+    this.spinner.show();
+    this.http
+      .get(`${environment.apiUrl}/api/ProductionCutting/GetProductionDashboard`)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            this.stages = res.data.stages || [];
+            this.orders = res.data.orders || [];
+          } else {
+            this.toastr.error(res.message, 'Error');
+          }
+          this.loading = false;
+          this.spinner.hide();
+          this.cdr.markForCheck();
+          setTimeout(() => this.buildCharts(), 0);
+        },
+        error: () => {
+          this.toastr.error('Error loading dashboard.', 'Error');
+          this.loading = false;
+          this.spinner.hide();
+        }
+      });
+  }
 
+  // ── Summary totals ────────────────────────────────────────
+  get totalBundlesAllOrders(): number {
+    return this.orders.reduce((s, o) => s + (o.totalBundles || 0), 0);
+  }
 
-       
-}
-loadDashboardDataSi(){
-   this.orderAlert();
+  get totalPcsAllOrders(): number {
+    return this.orders.reduce((s, o) => s + (o.totalPcs || 0), 0);
+  }
 
-  //  this.getMmc()
+  get stalledCount(): number {
+    return this.orders.filter(o => this.orderHasStall(o)).length;
+  }
 
-    this.getactivity()
+  get stalledOrders(): any[] {
+    return this.orders.filter(o => this.orderHasStall(o));
+  }
 
+  // ── Stall helpers ─────────────────────────────────────────
+  orderHasStall(order: any): boolean {
+    if (!order.stageBreakdown) return false;
+    return order.stageBreakdown.some((seg: any, idx: number) =>
+      idx < order.stageBreakdown.length - 1 &&
+      seg.pct >= this.STALL_PCT_THRESHOLD
+    );
+  }
 
-}
-getInitials(fullName: string): string {
-  if (!fullName) return '';
-  const parts = fullName.trim().split(' ');
-  if (parts.length === 1) return parts[0][0].toUpperCase();
-  return parts[0][0].toUpperCase() + ' ' + parts[parts.length - 1][0].toUpperCase();
-}
+  isStalled(seg: any, order: any): boolean {
+    const isLast = order.stageBreakdown[order.stageBreakdown.length - 1]?.id === seg.id;
+    return !isLast && seg.pct >= this.STALL_PCT_THRESHOLD;
+  }
 
-getPermission(menuName: string, key: keyof Permission) {
-  return this.store.select(selectPermissionByMenu(menuName)).pipe(
-    map(p => p?.[key] ?? false)
-  );
-}
+  getStalledStage(order: any): string {
+    const seg = (order.stageBreakdown || [])
+      .slice(0, -1)
+      .find((s: any) => s.pct >= this.STALL_PCT_THRESHOLD);
+    return seg?.stageName || '';
+  }
 
-getactivity(){
-  this.service.getActivities().subscribe(data => {
-      this.activities = data;
+  getStalledPct(order: any): number {
+    const seg = (order.stageBreakdown || [])
+      .slice(0, -1)
+      .find((s: any) => s.pct >= this.STALL_PCT_THRESHOLD);
+    return seg?.pct || 0;
+  }
+
+  // ── Conveyor ──────────────────────────────────────────────
+  getSegmentWeight(seg: any, order: any): number {
+    if (seg.bundleCount === 0) return 0.3;
+    return Math.max(seg.pct, 4);
+  }
+
+  getTopSegments(order: any): any[] {
+    return (order.stageBreakdown || [])
+      .filter((s: any) => s.bundleCount > 0)
+      .sort((a: any, b: any) => b.pcsCount - a.pcsCount)
+      .slice(0, 2);
+  }
+
+  // ── Stage distribution ────────────────────────────────────
+  getStagePct(stageId: number): number {
+    const total = this.totalPcsAllOrders;
+    if (!total) return 0;
+    const pcs = this.orders.reduce((sum, o) => {
+      const seg = (o.stageBreakdown || []).find((s: any) => s.id === stageId);
+      return sum + (seg?.pcsCount || 0);
+    }, 0);
+    return Math.round(pcs / total * 100);
+  }
+
+  getStageBundles(stageId: number): number {
+    return this.orders.reduce((sum, o) => {
+      const seg = (o.stageBreakdown || []).find((s: any) => s.id === stageId);
+      return sum + (seg?.bundleCount || 0);
+    }, 0);
+  }
+
+  // ── Drilldown ─────────────────────────────────────────────
+  openDrilldown(order: any): void {
+    this.drilldownOrder  = order;
+    this.drilldownFilter = null;
+    this.spinner.show();
+    this.http
+      .get(`${environment.apiUrl}/api/ProductionCutting/GetOrderBundleDrilldown/${order.id}`)
+      .subscribe({
+        next: (res: any) => {
+          if (res.success) {
+            this.drilldownBundles = res.data.bundles || [];
+          } else {
+            this.toastr.error(res.message, 'Error');
+          }
+          this.spinner.hide();
+        },
+        error: () => {
+          this.toastr.error('Error loading bundle detail.', 'Error');
+          this.spinner.hide();
+        }
+      });
+  }
+
+  closeDrilldown(): void {
+    this.drilldownOrder   = null;
+    this.drilldownBundles = [];
+    this.drilldownFilter  = null;
+  }
+
+  setDrilldownFilter(stageId: number | null): void {
+    this.drilldownFilter = stageId;
+  }
+
+  getStageCount(stageId: number): number {
+    return this.drilldownBundles.filter(b => b.currentStageId === stageId).length;
+  }
+
+  get filteredDrilldownBundles(): any[] {
+    if (this.drilldownFilter === null) return this.drilldownBundles;
+    return this.drilldownBundles.filter(b => b.currentStageId === this.drilldownFilter);
+  }
+
+  back(): void {
+    this.router.navigate(['/production-cutting/cutting-master']);
+  }
+
+  // ── Charts ────────────────────────────────────────────────
+  private buildCharts(): void {
+    this.buildDonut();
+    this.buildBar();
+  }
+
+  private buildDonut(): void {
+    if (!this.dshDonut?.nativeElement || !this.stages.length) return;
+    this.donutChart?.destroy();
+    this.donutChart = new Chart(this.dshDonut.nativeElement, {
+      type: 'doughnut',
+      data: {
+        labels: this.stages.map(s => s.stageName),
+        datasets: [{
+          data:            this.stages.map(s => this.getStagePct(s.id)),
+          backgroundColor: this.stages.map(s => s.color),
+          borderWidth: 0,
+          hoverOffset: 3,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '70%',
+        plugins: {
+          legend: { display: false },
+          tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.parsed}%` } },
+        },
+      },
     });
-}
-  orderAlert(){
-    let token = sessionStorage.getItem('Token');
-    let tokenInfo = this.getDecodedAccessToken(token || '');
-
-   
-let message = "";
-
-if (this.newdata?.[0]?.purchaseReqNumber) {
-  message = `📝 New Purchase Requisition Alert: ${this.newdata[0].purchaseReqNumber}`;
-} 
-else if (this.newdata?.[0]?.pOrderNumber) {
-  message = `📦 New Purchase Order Alert: ${this.newdata[0].pOrderNumber}`;
-} 
-else if (this.newdata?.[0]?.ogpNumber) {
-  message = `💰 New OGP Alert: ${this.newdata[0].ogpNumber}`;
-} 
-else if(this.newdata?.[0]?.rogpNumber){
-  message = `💰 New ROGP Alert: ${this.newdata[0].rogpNumber}`;
-}
-else if(this.newdata?.[0]?.igP_ROGPNumber){
-  message = `💰 New IGP_ROGP Alert: ${this.newdata[0].igP_ROGPNumber}`;
-}
-
-//  if((tokenInfo.role == 'Admin' || tokenInfo.role == 'C-Level Executive') && this.newdata[0].Status === 'Checked') {
-//        this.notifyFunction(message);
-//     }
-//    else{
-//       this.notifyFunction(message);
-//     }
-
-this.canUserSignOff().subscribe(canSignOff => {
-  if (
-    canSignOff &&
-    (this.newdata[0].Status === 'Checked' || this.newdata[0].Status === 'Approved')
-  ) {
-    this.notifyFunction(message);
-  }
-});
   }
 
-canUserSignOff(): Observable<boolean> {
-  return combineLatest([
-    this.pRCanSignOff$,
-
-  ]).pipe(
-    map(([pr]) => pr)
-  );
-}
-notifyFunction(message:any){
-    Swal.fire({
-    customClass : {
-      title: 'swal2-title'
-    },
-    toast: true,
-    icon: 'info',
-    showConfirmButton: false,
-    title: message,
-    padding: '1em',
-    background: 'linear-gradient(to right, #a86008, #ffba56)',
-    position:'top-right',
-  
-    //timer:50000
-    
-  })
- const audio = new Audio('../../../assets/toast_sound.mp3');
-  audio.load();
-  audio.play().catch(err => console.error('Audio play failed:', err));
-}
-  getDecodedAccessToken(token: string): any {
-    try{
-        return jwt_decode(token);
-    }
-    catch(Error){
-        return null;
-    }
+  private buildBar(): void {
+    if (!this.dshBar?.nativeElement) return;
+    this.barChart?.destroy();
+    this.barChart = new Chart(this.dshBar.nativeElement, {
+      type: 'bar',
+      data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets: [{
+          label: 'Bundles',
+          data: [48, 62, 55, 71, 88, 43, 29],   // replace with real API data when available
+          backgroundColor: '#2563eb',
+          borderRadius: 4,
+          borderSkipped: false,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false }, ticks: { color: '#9ca3af', font: { size: 11 } } },
+          y: { grid: { color: 'rgba(0,0,0,.06)' }, ticks: { color: '#9ca3af', font: { size: 11 } }, border: { display: false } },
+        },
+      },
+    });
   }
-
-
-
-  
-
-
-  }
- 
-
+}

@@ -6,8 +6,22 @@ import { AddEditCuttingMasterComponent } from './cutting-master/add-edit-cutting
 import { RollRegisterComponent } from './cutting-master/roll-register/roll-register.component';
 import { LaySpreadingReportComponent } from './cutting-master/lay-spreading-report/lay-spreading-report.component';
 import { ScanCuttingComponent } from './scan-cutting/scan-cutting.component';
+import { CuttingDashboardComponent } from './cutting-dashboard/cutting-dashboard.component';
 
 const routes: Routes = [
+
+    {
+                path: 'cutting-dashboard',
+                component: CuttingDashboardComponent,
+                canActivate: [AuthGuard],
+                 data: {
+      title: 'Dashboard',
+      breadcrumbs: [
+        { label: 'Production Cutting', url: '/production-cutting/cutting-master' },
+        { label: 'Cutting Planning' }
+      ]
+    }
+              },
     {
                 path: 'cutting-master',
                 component: CuttingMasterComponent,

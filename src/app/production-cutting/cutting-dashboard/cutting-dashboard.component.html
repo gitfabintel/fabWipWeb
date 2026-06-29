@@ -1,0 +1,264 @@
+<div class="cd-page">
+
+  <!-- ══ Header ══════════════════════════════════════════ -->
+  <!-- <div class="cd-header">
+    <div>
+      <h1 class="cd-title">
+        <i class="ti ti-cut" aria-hidden="true"></i>
+        Cutting dashboard
+      </h1>
+      <p class="cd-sub">Production cutting — live overview</p>
+    </div>
+    <div class="cd-header-actions">
+      <span class="cd-updated">Today, {{ today }}</span>
+      <button class="cd-btn-outline" (click)="refresh()" [disabled]="loading">
+        <i class="ti ti-refresh" [class.cd-spin]="loading" aria-hidden="true"></i>
+        Refresh
+      </button>
+    </div>
+  </div> -->
+
+  <!-- ══ Error ══════════════════════════════════════════ -->
+  <div class="cd-error" *ngIf="error">
+    <i class="ti ti-alert-circle" aria-hidden="true"></i>
+    {{ error }}
+    <button (click)="refresh()">Retry</button>
+  </div>
+
+  <!-- ══ Skeleton / Loading ══════════════════════════════ -->
+  <ng-container *ngIf="loading">
+    <div class="cd-stats">
+      <div class="cd-stat cd-skeleton" *ngFor="let i of [1,2,3,4]"></div>
+    </div>
+    <div class="cd-row2">
+      <div class="cd-card cd-skeleton" style="height:220px"></div>
+      <div class="cd-card cd-skeleton" style="height:220px"></div>
+    </div>
+  </ng-container>
+
+  <!-- ══ Content ════════════════════════════════════════ -->
+  <ng-container *ngIf="!loading && !error && summary">
+
+    <!-- ── Stat cards ─────────────────────────────────── -->
+    <div class="cd-stats">
+
+      <div class="cd-stat">
+        <div class="cd-stat-label">
+          <i class="ti ti-layers-intersect" aria-hidden="true"></i> Active lays today
+        </div>
+        <div class="cd-stat-val">{{ summary.activeLays }}</div>
+        <div class="cd-stat-sub"
+          [class.positive]="summary.activeLaysChange >= 0"
+          [class.negative]="summary.activeLaysChange < 0">
+          {{ sign(summary.activeLaysChange) }} vs yesterday
+        </div>
+      </div>
+
+      <div class="cd-stat">
+        <div class="cd-stat-label">
+          <i class="ti ti-stack-2" aria-hidden="true"></i> Bundles generated
+        </div>
+        <div class="cd-stat-val">{{ summary.bundlesGenerated }}</div>
+        <div class="cd-stat-sub neutral">{{ summary.bundlesPendingQc }} pending QC</div>
+      </div>
+
+      <div class="cd-stat">
+        <div class="cd-stat-label">
+          <i class="ti ti-trending-down" aria-hidden="true"></i> Avg wastage
+        </div>
+        <div class="cd-stat-val">{{ summary.avgWastage.toFixed(1) }}%</div>
+        <div class="cd-stat-sub"
+          [class.positive]="summary.avgWastageChange <= 0"
+          [class.negative]="summary.avgWastageChange > 0">
+          {{ sign(-summary.avgWastageChange) }}% vs last week
+        </div>
+      </div>
+
+      <div class="cd-stat" [class.cd-stat-alert]="summary.overdueCuts > 0">
+        <div class="cd-stat-label">
+          <i class="ti ti-clock-exclamation" aria-hidden="true"></i> Overdue cuts
+        </div>
+        <div class="cd-stat-val" [class.val-red]="summary.overdueCuts > 0">
+          {{ summary.overdueCuts }}
+        </div>
+        <div class="cd-stat-sub negative" *ngIf="summary.overdueCuts > 0">Action required</div>
+        <div class="cd-stat-sub positive" *ngIf="summary.overdueCuts === 0">All on track</div>
+      </div>
+
+    </div>
+
+    <!-- ── Row: efficiency chart + donut ──────────────── -->
+    <div class="cd-row2">
+
+      <div class="cd-card">
+        <div class="cd-card-header">
+          <span class="cd-card-title">
+            <i class="ti ti-chart-bar" aria-hidden="true"></i>
+            Marker efficiency by style
+          </span>
+          <span class="cd-legend-row">
+            <span class="cd-dot" style="background:#2563eb"></span> ≥85%
+            <span class="cd-dot" style="background:#d97706"></span> 78–84%
+            <span class="cd-dot" style="background:#dc2626"></span> &lt;78%
+          </span>
+        </div>
+        <div class="cd-chart-wrap" style="height:200px">
+          <canvas #effCanvas
+            role="img"
+            aria-label="Bar chart showing marker efficiency percentage per style">
+          </canvas>
+        </div>
+      </div>
+
+      <div class="cd-card">
+        <div class="cd-card-header">
+          <span class="cd-card-title">
+            <i class="ti ti-git-branch" aria-hidden="true"></i>
+            Cut plan status
+          </span>
+          <span class="cd-total-badge">{{ donutTotal() }} total</span>
+        </div>
+        <div class="cd-donut-layout">
+          <div class="cd-chart-wrap" style="height:160px;width:160px;flex-shrink:0;position:relative">
+            <canvas #donutCanvas
+              role="img"
+              aria-label="Donut chart showing cut plan status breakdown">
+            </canvas>
+            <div class="cd-donut-center">
+              <div class="cd-donut-num">{{ donutTotal() }}</div>
+              <div class="cd-donut-lbl">plans</div>
+            </div>
+          </div>
+          <div class="cd-donut-legend" *ngIf="cutStatus">
+            <div class="cd-legend-item">
+              <span class="cd-dot" style="background:#16a34a"></span>
+              <span>Approved</span>
+              <span class="cd-legend-val">{{ cutStatus.approved }}</span>
+            </div>
+            <div class="cd-legend-item">
+              <span class="cd-dot" style="background:#2563eb"></span>
+              <span>Checked</span>
+              <span class="cd-legend-val">{{ cutStatus.checked }}</span>
+            </div>
+            <div class="cd-legend-item">
+              <span class="cd-dot" style="background:#9ca3af"></span>
+              <span>Draft</span>
+              <span class="cd-legend-val">{{ cutStatus.draft }}</span>
+            </div>
+            <div class="cd-legend-item">
+              <span class="cd-dot" style="background:#dc2626"></span>
+              <span>Overdue</span>
+              <span class="cd-legend-val">{{ cutStatus.overdue }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── Wastage trend ───────────────────────────────── -->
+    <div class="cd-card">
+      <div class="cd-card-header">
+        <span class="cd-card-title">
+          <i class="ti ti-wave-sine" aria-hidden="true"></i>
+          Fabric wastage trend — last 7 days
+        </span>
+        <span class="cd-badge cd-badge-blue">Target &lt; 3%</span>
+      </div>
+      <div class="cd-chart-wrap" style="height:160px">
+        <canvas #wastageCanvas
+          role="img"
+          aria-label="Line chart showing fabric wastage percentage over the last 7 days">
+        </canvas>
+      </div>
+    </div>
+
+    <!-- ── Jobs table ─────────────────────────────────── -->
+    <div class="cd-card">
+      <div class="cd-card-header">
+        <span class="cd-card-title">
+          <i class="ti ti-list" aria-hidden="true"></i>
+          Cutting jobs
+        </span>
+        <div class="cd-table-controls">
+          <div class="cd-search-wrap">
+            <i class="ti ti-search cd-search-icon" aria-hidden="true"></i>
+            <input
+              class="cd-search"
+              type="text"
+              placeholder="Search job or style…"
+              [(ngModel)]="jobSearch"
+            />
+          </div>
+          <select class="cd-select" [(ngModel)]="statusFilter">
+            <option *ngFor="let s of statusOptions" [value]="s">{{ s }}</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="cd-table-wrap">
+        <table class="cd-table">
+          <thead>
+            <tr>
+              <th (click)="sortBy('jobNo')" class="sortable">
+                Job # <i class="ti {{ sortIcon('jobNo') }}" aria-hidden="true"></i>
+              </th>
+              <th (click)="sortBy('styleNo')" class="sortable">
+                Style <i class="ti {{ sortIcon('styleNo') }}" aria-hidden="true"></i>
+              </th>
+              <th (click)="sortBy('cutDate')" class="sortable">
+                Date <i class="ti {{ sortIcon('cutDate') }}" aria-hidden="true"></i>
+              </th>
+              <th (click)="sortBy('lays')" class="sortable">
+                Lays <i class="ti {{ sortIcon('lays') }}" aria-hidden="true"></i>
+              </th>
+              <th (click)="sortBy('plies')" class="sortable">
+                Plies <i class="ti {{ sortIcon('plies') }}" aria-hidden="true"></i>
+              </th>
+              <th (click)="sortBy('bundles')" class="sortable">
+                Bundles <i class="ti {{ sortIcon('bundles') }}" aria-hidden="true"></i>
+              </th>
+              <th (click)="sortBy('markerEfficiency')" class="sortable">
+                Efficiency <i class="ti {{ sortIcon('markerEfficiency') }}" aria-hidden="true"></i>
+              </th>
+              <th (click)="sortBy('status')" class="sortable">
+                Status <i class="ti {{ sortIcon('status') }}" aria-hidden="true"></i>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let job of filteredJobs" [class.row-overdue]="job.status === 'Overdue'">
+              <td class="fw-500">{{ job.jobNo }}</td>
+              <td>{{ job.styleNo }}</td>
+              <td>{{ job.cutDate }}</td>
+              <td>{{ job.lays }}</td>
+              <td>{{ job.plies }}</td>
+              <td>{{ job.bundles }}</td>
+              <td>
+                <span class="cd-badge" [ngClass]="effColor(job.markerEfficiency)">
+                  {{ job.markerEfficiency }}%
+                </span>
+              </td>
+              <td>
+                <span class="cd-badge" [ngClass]="statusClass(job.status)">
+                  {{ job.status }}
+                </span>
+              </td>
+            </tr>
+            <tr *ngIf="filteredJobs.length === 0">
+              <td colspan="8" class="cd-empty">
+                <i class="ti ti-search-off" aria-hidden="true"></i>
+                No jobs match your filter
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="cd-table-footer">
+        Showing {{ filteredJobs.length }} of {{ recentJobs.length }} jobs
+      </div>
+    </div>
+
+  </ng-container>
+</div>

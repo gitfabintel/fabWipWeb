@@ -1,321 +1,209 @@
-<div class="content d-flex flex-column flex-column-fluid" id="kt_content" data-select2-id="select2-data-kt_content">
-						<!--begin::Post-->
-						<div class="post d-flex flex-column-fluid" id="kt_post" data-select2-id="select2-data-kt_post">
-							<!--begin::Container-->
-							<div id="kt_content_container" class="container-xxl" data-select2-id="select2-data-kt_content_container">
+<div class="fi-page">
 
+  <!-- ══ Toolbar ══════════════════════════════════════════ -->
+  <div class="fi-toolbar">
 
-<div class="card">
-  <!--begin::Card header-->
-  <div class="card-header border-0 pt-6">
-    <!--begin::Card title-->
-    <div class="card-title">
-      <div class="d-flex align-items-center position-relative my-1">
-        <i class="ki-duotone ki-magnifier fs-3 position-absolute ms-5">
-          <span class="path1"></span>
-          <span class="path2"></span>
-        </i>
-        <input type="text" class="form-control form-control-solid w-250px ps-13"
-               placeholder="Search cutting plans..."
-               (input)="onFilterField($any($event.target).value)">
-      </div>
+    <div class="fi-search-wrap">
+      <i class="ti ti-search fi-search-icon" aria-hidden="true"></i>
+      <input class="fi-search" type="text"
+        placeholder="Search cutting plans…"
+        (input)="onFilterField($any($event.target).value)" />
     </div>
-    <!--end::Card title-->
 
-    <!--begin::Card toolbar-->
-    <div class="card-toolbar">
-      <div class="d-flex justify-content-end align-items-center gap-2" data-kt-user-table-toolbar="base">
-
-        <!-- Date Range Filter -->
-        <div class="d-flex align-items-center gap-2">
-          <label class="fw-semibold text-gray-600 text-nowrap">From</label>
-          <input type="date" class="form-control form-control-solid w-150px"
-                 [(ngModel)]="data1.startDate" name="startDate">
-          <label class="fw-semibold text-gray-600 text-nowrap">To</label>
-          <input type="date" class="form-control form-control-solid w-150px"
-                 [(ngModel)]="data1.endDate" name="endDate">
-        </div>
-
-        <!-- Search Button -->
-        <button type="button" class="btn btn-sm btn-success" (click)="get()">
-          <i class="ki-duotone ki-magnifier fs-2">
-            <span class="path1"></span>
-            <span class="path2"></span>
-          </i>Search
-        </button>
-
-        <!-- Reset Button -->
-        <button type="button" class="btn btn-sm btn-light-primary" (click)="reset()">
-          <i class="ki-duotone ki-arrows-circle fs-2">
-            <span class="path1"></span>
-            <span class="path2"></span>
-          </i>Reset
-        </button>
-
-        <!-- Export Button -->
-        <!-- <button type="button" class="btn btn-light-primary"
-                data-bs-toggle="modal" data-bs-target="#kt_modal_export_cutting">
-          <i class="ki-duotone ki-exit-up fs-2">
-            <span class="path1"></span>
-            <span class="path2"></span>
-          </i>Export
-        </button> -->
-
-        <!-- Add Button -->
-        <button *ngIf="canAdd$ | async" type="button" class="btn btn-sm btn-primary" (click)="add('Add')">
-          <i class="ki-duotone ki-plus fs-2"></i>Add
-        </button>
-
-      </div>
+    <div class="fi-date-group">
+      <label class="fi-input-label">From</label>
+      <input class="fi-input fi-input-date" type="date"
+        [(ngModel)]="data1.startDate" name="startDate" />
+      <label class="fi-input-label">To</label>
+      <input class="fi-input fi-input-date" type="date"
+        [(ngModel)]="data1.endDate" name="endDate" />
     </div>
-    <!--end::Card toolbar-->
+
+    <div class="fi-toolbar-right">
+      <button class="fi-btn fi-btn-success" (click)="get()">
+        <i class="ti ti-search" aria-hidden="true"></i> Search
+      </button>
+      <button class="fi-btn fi-btn-outline" (click)="reset()">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Reset
+      </button>
+      <button *ngIf="canAdd$ | async" class="fi-btn fi-btn-primary" (click)="add('Add')">
+        <i class="ti ti-plus" aria-hidden="true"></i> Add
+      </button>
+    </div>
+
   </div>
-  <!--end::Card header-->
 
-  <!--begin::Card body-->
-  <div class="card-body py-4">
+  <!-- ══ Card ══════════════════════════════════════════════ -->
+  <div class="fi-card">
 
-    <!--begin::Loading indicator-->
-    <div *ngIf="loadingIndicator" class="d-flex justify-content-center py-10">
-      <span class="spinner-border text-primary" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </span>
+    <!-- Loading -->
+    <div class="fi-loading" *ngIf="loadingIndicator">
+      <span class="fi-spinner" aria-hidden="true"></span> Loading…
     </div>
-    <!--end::Loading indicator-->
 
-    <!--begin::Table-->
-    <div class="table-responsive" *ngIf="!loadingIndicator">
-      <table class="table align-middle table-row-dashed fs-6 gy-5" id="kt_table_cutting_plans">
+    <!-- Table -->
+    <div class="fi-table-wrap" *ngIf="!loadingIndicator">
+      <table class="fi-table">
         <thead>
-          <tr class="text-start text-muted fw-bold fs-7 text-uppercase gs-0">
-            <th class="min-w-80px">Cutting #</th>
-            <th class="min-w-120px">Customer</th>
-            <th class="min-w-150px">DC# / Style / Color</th>
-            <th class="min-w-100px">Order QTY</th>
-            <th class="min-w-100px">Planned Cut QTY</th>
-            <th class="min-w-100px">Dated</th>
-            <th class="min-w-120px">Status</th>
-            <th class="min-w-120px">Bundles</th>
-            <th class="text-end min-w-100px">Actions</th>
+          <tr>
+            <th>Cutting #</th>
+            <th>Customer</th>
+            <th>Style / Color</th>
+            <th class="right">Order Qty</th>
+            <th class="right">Planned Qty</th>
+            <th>Dated</th>
+            <th>Status</th>
+            <th>Bundles</th>
+            <th class="right" style="padding-right:16px">Actions</th>
           </tr>
         </thead>
-        <tbody class="text-gray-600 fw-semibold">
-          <tr *ngFor="let dataItem of gridView">
+        <tbody>
 
-            <!-- Cutting # -->
+          <tr *ngFor="let row of gridView"
+              [class.fi-row-overdue]="row.status === 'Overdue'">
+
+            <td class="fi-cell-primary">{{ row.productionCuttingHeaderNumber }}</td>
+
+            <td>{{ row.customerName }}</td>
+
             <td>
-              <span class="text-gray-800 fw-bold fs-6">
-                {{ dataItem.productionCuttingHeaderNumber }}
-              </span>
-            </td>
-
-            <!-- Customer -->
-            <td>
-              <span class="text-gray-800 fw-bold fs-6">
-                {{ dataItem.customerName }}
-              </span>
-            </td>
-
-            <!-- DC# / Style / Color / Driver -->
-            <td>
-              <span class="text-gray-800 fw-bold d-block">{{ dataItem.styleName }}</span>
-              <span class="text-muted fw-semibold d-block fs-7">
-                {{ dataItem.colorName }}
-                <span *ngIf="dataItem.driverName"> — {{ dataItem.driverName }}</span>
-              </span>
-            </td>
-
-            <!-- Order QTY -->
-            <td>
-              <span class="text-gray-800 fw-bold">{{ dataItem.orderQty }}</span>
-            </td>
-
-            <!-- Planned Cut QTY -->
-            <td>
-              <span class="text-gray-800 fw-bold">{{ dataItem.plannedCutQty }}</span>
-            </td>
-
-            <!-- Dated -->
-            <td>
-              <span class="text-gray-600">{{ dataItem.createdDateTime | date:'dd-MMM-yyyy' }}</span>
-            </td>
-
-            <!-- Status Badge -->
-            <td>
-              <span [ngSwitch]="dataItem.status">
-                <span *ngSwitchCase="'Approved'"
-                      class="badge badge-light-primary fw-bold fs-7 px-4 py-3">
-                  Approved
-                </span>
-                <span *ngSwitchCase="'Draft'"
-                      class="badge badge-light-warning fw-bold fs-7 px-4 py-3">
-                  Draft
-                </span>
-                <span *ngSwitchCase="'Checked'"
-                      class="badge badge-light-success fw-bold fs-7 px-4 py-3">
-                  Checked
-                </span>
-                <span *ngSwitchCase="'Rejected'"
-                      class="badge badge-light-danger fw-bold fs-7 px-4 py-3">
-                  Rejected
-                </span>
-                <span *ngSwitchDefault
-                      class="badge badge-light-secondary fw-bold fs-7 px-4 py-3">
-                  {{ dataItem.status }}
-                </span>
-              </span>
-            </td>
-
-            <!-- Bundles -->
-            <td>
-              <span class="text-gray-800 fw-bold d-block">{{ dataItem.totalBundles }}</span>
-              <span class="text-muted fw-semibold d-block fs-7">{{ dataItem.totalBundlePcs }} pcs</span>
-            </td>
-
-            <!-- Actions Dropdown -->
-            <td class="text-end">
-              <a href="#" class="btn btn-light btn-active-light-primary btn-flex btn-center btn-sm"
-                 data-kt-menu-trigger="click"
-                 data-kt-menu-placement="bottom-end">
-                Actions
-                <i class="ki-duotone ki-down fs-5 ms-1"></i>
-              </a>
-
-              <!--begin::Actions Menu-->
-              <div class="menu menu-sub menu-sub-dropdown menu-column menu-rounded
-                          menu-gray-600 menu-state-bg-light-primary fw-semibold fs-7
-                          w-225px py-4"
-                   data-kt-menu="true">
-
-                <!-- Print Cutting Plan -->
-                <div class="menu-item px-3">
-                  <a href="javascript:;" class="menu-link px-3 text-success"
-                     (click)="printsportmethod(dataItem)">
-                    <i class="fa-solid fa-file-pdf me-2"></i> Print Cutting Plan
-                  </a>
-                </div>
-
-                <!-- Print Bundle Core Sheet -->
-                <div class="menu-item px-3" *ngIf="dataItem.bundlesGenerated && dataItem.cutId">
-                  <a href="javascript:;" class="menu-link px-3 text-warning"
-                     (click)="printsportmethodBundles(dataItem)">
-                    <i class="fa-solid fa-layer-group me-2"></i> Print Bundle Core Sheet
-                  </a>
-                </div>
-
-                <!-- Print Bundle Tickets -->
-                <div class="menu-item px-3" *ngIf="dataItem.bundlesGenerated && dataItem.cutId">
-                  <a href="javascript:;" class="menu-link px-3 text-info"
-                     (click)="printBundleTickets(dataItem)">
-                    <i class="fa-solid fa-ticket me-2"></i> Print Bundle Tickets
-                  </a>
-                </div>
-
-                <!-- Lay Spreading Report -->
-                <div class="menu-item px-3"
-                     *ngIf="dataItem.cutId && dataItem.status !== 'Approved'">
-                  <a href="javascript:;" class="menu-link px-3 text-info"
-                     (click)="openLaySpreadingReport(dataItem)">
-                    <i class="fa-solid fa-scroll me-2"></i> Lay Spreading Report
-                  </a>
-                </div>
-
-                <!-- Divider -->
-                <div class="separator my-2"
-                     *ngIf="dataItem.status !== 'Approved'"></div>
-
-                <!-- Generate / Regenerate Bundles -->
-                <div class="menu-item px-3"
-                     *ngIf="dataItem.cutId && dataItem.status !== 'Approved'">
-                  <a href="javascript:;" class="menu-link px-3"
-                     (click)="generateBundles(dataItem)">
-                    <i class="fa-solid fa-cubes me-2"></i>
-                    {{ dataItem.bundlesGenerated ? 'Regenerate Bundles' : 'Generate Bundles' }}
-                  </a>
-                </div>
-
-                <!-- Mark as Checked -->
-                <div class="menu-item px-3" *ngIf="dataItem.status === 'Draft'">
-                  <a href="javascript:;" class="menu-link px-3 text-success"
-                     (click)="updateStatus(dataItem, 'Checked')">
-                    <i class="fa-solid fa-circle-check me-2"></i> Mark as Checked
-                  </a>
-                </div>
-
-                <!-- Approve -->
-                <div class="menu-item px-3" *ngIf="dataItem.status === 'Checked'">
-                  <a href="javascript:;" class="menu-link px-3 text-primary"
-                     (click)="updateStatus(dataItem, 'Approved')">
-                    <i class="fa-solid fa-badge-check me-2"></i> Approve
-                  </a>
-                </div>
-
-                <!-- Move to Floor -->
-                <div class="menu-item px-3"
-                     *ngIf="dataItem.status === 'Approved' && dataItem.cutId">
-                  <a href="javascript:;" class="menu-link px-3 text-success"
-                     (click)="moveToFloor(dataItem)">
-                    <i class="fa-solid fa-truck-ramp-box me-2"></i> Move to Floor
-                  </a>
-                </div>
-
-                <!-- Revert to Draft -->
-                <div class="menu-item px-3" *ngIf="dataItem.status === 'Checked'">
-                  <a href="javascript:;" class="menu-link px-3 text-warning"
-                     (click)="updateStatus(dataItem, 'Draft')">
-                    <i class="fa-solid fa-rotate-left me-2"></i> Revert to Draft
-                  </a>
-                </div>
-
-                <!-- Divider -->
-                <div class="separator my-2"></div>
-
-                <!-- Edit -->
-                <div class="menu-item px-3" *ngIf="dataItem.status !== 'Approved'">
-                  <a href="javascript:;" class="menu-link px-3 text-primary"
-                     (click)="edit(dataItem, 'Edit')">
-                    <i class="fa-solid fa-pen-to-square me-2"></i> Edit
-                  </a>
-                </div>
-
-                <!-- Delete -->
-                <div class="menu-item px-3"
-                     *ngIf="(canDelete$ | async) && dataItem.status === 'Draft'">
-                  <a href="javascript:;" class="menu-link px-3 text-danger"
-                     (click)="onDelete(dataItem)">
-                    <i class="fa-solid fa-trash me-2"></i> Delete
-                  </a>
-                </div>
-
-                <!-- Approved & Locked -->
-                <div class="menu-item px-3" *ngIf="dataItem.status === 'Approved'">
-                  <span class="menu-link px-3 text-muted pe-none">
-                    <i class="fas fa-lock me-2"></i> Approved & Locked
-                  </span>
-                </div>
-
+              <div class="fi-cell-stack">
+                <span class="fi-fw-600" style="color:var(--fi-text-primary)">{{ row.styleName }}</span>
+                <span class="fi-cell-stack-sub">{{ row.colorName }}</span>
               </div>
-              <!--end::Actions Menu-->
+            </td>
+
+            <td class="right fi-cell-primary">{{ row.orderQty }}</td>
+            <td class="right fi-cell-primary">{{ row.plannedCutQty }}</td>
+
+            <td class="fi-cell-muted">{{ row.createdDateTime | date:'dd-MMM-yyyy' }}</td>
+
+            <td>
+              <span class="fi-badge" [ngClass]="{
+                'fi-badge-green':  row.status === 'Approved',
+                'fi-badge-blue':   row.status === 'Checked',
+                'fi-badge-amber':  row.status === 'Draft',
+                'fi-badge-red':    row.status === 'Rejected'
+              }">{{ row.status }}</span>
+            </td>
+
+            <td>
+              <div class="fi-cell-stack">
+                <span class="fi-fw-600" style="color:var(--fi-text-primary)">{{ row.totalBundles }}</span>
+                <span class="fi-cell-stack-sub">{{ row.totalBundlePcs }} pcs</span>
+              </div>
+            </td>
+
+            <!-- Actions -->
+            <td style="text-align:right;padding-right:16px">
+              <div class="fi-dropdown">
+                <button class="fi-btn fi-btn-outline fi-btn-sm"
+                  (click)="toggleMenu($event, row)">
+                  Actions <i class="ti ti-chevron-down" aria-hidden="true"></i>
+                </button>
+
+                <div class="fi-menu" *ngIf="row._menuOpen"
+                  [style.top.px]="menuTop"
+                  [style.left.px]="menuLeft"
+                  (click)="$event.stopPropagation()">
+
+                  <button class="fi-menu-item" (click)="printsportmethod(row); closeAllMenus()">
+                    <i class="ti ti-file-type-pdf" style="color:#16a34a" aria-hidden="true"></i>
+                    Print cutting plan
+                  </button>
+
+                  <button class="fi-menu-item" *ngIf="row.bundlesGenerated && row.cutId"
+                    (click)="printsportmethodBundles(row); closeAllMenus()">
+                    <i class="ti ti-layers-intersect" style="color:#d97706" aria-hidden="true"></i>
+                    Print bundle core sheet
+                  </button>
+
+                  <button class="fi-menu-item" *ngIf="row.bundlesGenerated && row.cutId"
+                    (click)="printBundleTickets(row); closeAllMenus()">
+                    <i class="ti ti-ticket" style="color:#2563eb" aria-hidden="true"></i>
+                    Print bundle tickets
+                  </button>
+
+                  <button class="fi-menu-item" *ngIf="row.cutId && row.status !== 'Approved'"
+                    (click)="openLaySpreadingReport(row); closeAllMenus()">
+                    <i class="ti ti-scroll" style="color:#2563eb" aria-hidden="true"></i>
+                    Lay spreading report
+                  </button>
+
+                  <div class="fi-menu-divider" *ngIf="row.cutId && row.status !== 'Approved'"></div>
+
+                  <button class="fi-menu-item" *ngIf="row.cutId && row.status !== 'Approved'"
+                    (click)="generateBundles(row); closeAllMenus()">
+                    <i class="ti ti-stack-2" aria-hidden="true"></i>
+                    {{ row.bundlesGenerated ? 'Regenerate bundles' : 'Generate bundles' }}
+                  </button>
+
+                  <button class="fi-menu-item" *ngIf="row.status === 'Draft'"
+                    (click)="updateStatus(row,'Checked'); closeAllMenus()">
+                    <i class="ti ti-circle-check" style="color:#16a34a" aria-hidden="true"></i>
+                    Mark as checked
+                  </button>
+
+                  <button class="fi-menu-item" *ngIf="row.status === 'Checked'"
+                    (click)="updateStatus(row,'Approved'); closeAllMenus()">
+                    <i class="ti ti-rosette-discount-check" style="color:#2563eb" aria-hidden="true"></i>
+                    Approve
+                  </button>
+
+                  <button class="fi-menu-item" *ngIf="row.status === 'Approved' && row.cutId"
+                    (click)="moveToFloor(row); closeAllMenus()">
+                    <i class="ti ti-truck-delivery" style="color:#16a34a" aria-hidden="true"></i>
+                    Move to floor
+                  </button>
+
+                  <button class="fi-menu-item" *ngIf="row.status === 'Checked'"
+                    (click)="updateStatus(row,'Draft'); closeAllMenus()">
+                    <i class="ti ti-rotate-left" style="color:#d97706" aria-hidden="true"></i>
+                    Revert to draft
+                  </button>
+
+                  <div class="fi-menu-divider"></div>
+
+                  <button class="fi-menu-item" *ngIf="row.status !== 'Approved'"
+                    (click)="edit(row,'Edit'); closeAllMenus()">
+                    <i class="ti ti-pencil" style="color:#2563eb" aria-hidden="true"></i>
+                    Edit
+                  </button>
+
+                  <button class="fi-menu-item fi-menu-item-danger"
+                    *ngIf="(canDelete$ | async) && row.status === 'Draft'"
+                    (click)="onDelete(row); closeAllMenus()">
+                    <i class="ti ti-trash" aria-hidden="true"></i>
+                    Delete
+                  </button>
+
+                  <div class="fi-menu-locked" *ngIf="row.status === 'Approved'">
+                    <i class="ti ti-lock" aria-hidden="true"></i>
+                    Approved &amp; locked
+                  </div>
+
+                </div>
+              </div>
             </td>
 
           </tr>
 
-          <!-- Empty state -->
           <tr *ngIf="!gridView || gridView.length === 0">
-            <td colspan="9" class="text-center py-10">
-              <div class="text-muted fw-semibold fs-6">No cutting plans found</div>
+            <td colspan="9" class="fi-table-empty">
+              <i class="ti ti-clipboard-off" aria-hidden="true"></i>
+              No cutting plans found
             </td>
           </tr>
 
         </tbody>
       </table>
     </div>
-    <!--end::Table-->
+
+    <div class="fi-table-footer" *ngIf="!loadingIndicator && gridView?.length">
+      {{ gridView.length }} record{{ gridView.length === 1 ? '' : 's' }}
+    </div>
 
   </div>
-  <!--end::Card body-->
 </div>
 
-</div>
-</div>
-</div>
+<div class="fi-backdrop" *ngIf="hasOpenMenu()" (click)="closeAllMenus()"></div>
