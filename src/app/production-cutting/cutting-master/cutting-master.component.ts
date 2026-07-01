@@ -77,7 +77,7 @@ data1:any={}
   ) {}
 
     ngOnInit(): void {
-    const menuName = 'Inward Gate Pass'; // or 'Security/Users' or whatever your key is
+    const menuName = 'Cutting Marker Planning'; // or 'Security/Users' or whatever your key is
 
     const permission$ = this.store.select(selectPermissionByMenu(menuName));
 

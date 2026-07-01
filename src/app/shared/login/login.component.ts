@@ -14,14 +14,13 @@ import { selectAllPermissions } from 'src/app/permission/permission.selectors';
 // Add a new line here whenever you finish a new dashboard.
 // ─────────────────────────────────────────────────────────────
 const PERMISSION_ROUTES: [string, string][] = [
+  ['Wip Dashboard',               '/admin'],
   ['Cutting Dashboard',  '/production-cutting/cutting-dashboard'],
   ['Production Floor',    '/production-floor/dashboard'],
   ['Quality Control',     '/quality-control/dashboard'],
   ['Packing',             '/packing/dashboard'],
   ['Finishing',           '/packing/dashboard'],
   ['Dispatch',            '/dispatch/dashboard'],
-  ['Dashboard ERP',       '/admin'],
-  ['Wip Dashboard',               '/admin'],
 ];
 
 const DEFAULT_ROUTE = '/admin';

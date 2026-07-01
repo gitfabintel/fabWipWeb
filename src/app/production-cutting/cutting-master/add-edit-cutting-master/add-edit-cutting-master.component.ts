@@ -129,7 +129,7 @@ jobDetails = {
   ) {}
 
    ngOnInit(): void {
-    const menuName = 'Inward Gate Pass';
+    const menuName = 'Cutting Marker Planning';
     const permission$ = this.store.select(selectPermissionByMenu(menuName));
     this.canUpdate$ = permission$.pipe(map((p: any) => p?.canUpdate ?? false));
     this.statusCheck = this.route.snapshot.queryParamMap.get('statusCheck');

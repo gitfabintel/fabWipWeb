@@ -60,7 +60,7 @@ tokeninfo:any
           label: 'Dashboard',
           icon: 'ti-layout-dashboard',
           route: '/admin',
-          permission: 'Dashboard ERP',
+          permission: 'Wip Dashboard',
         },
       ],
     },
