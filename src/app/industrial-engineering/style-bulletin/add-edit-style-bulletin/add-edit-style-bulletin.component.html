@@ -1,0 +1,295 @@
+<div class="fi-page">
+  <ngx-spinner bdColor="rgba(0,0,0,.6)" size="medium" color="#fff"
+    type="ball-scale-multiple" [fullScreen]="false">
+  </ngx-spinner>
+
+  <!-- ── Toolbar ─────────────────────────────────────────── -->
+  <div class="fi-toolbar">
+    <div>
+      <div style="font-size:10px;font-weight:600;text-transform:uppercase;
+                  letter-spacing:.1em;color:var(--fi-accent);margin-bottom:2px">
+        Industrial Engineering
+      </div>
+      <h1 style="font-size:17px;font-weight:600;color:var(--fi-text-primary);margin:0">
+        {{ statusCheck === 'Add' ? 'New Style Bulletin' : 'Update Style Bulletin' }}
+        <span class="fi-badge fi-badge-gray" *ngIf="data.code" style="margin-left:8px">
+          {{ data.code }}
+        </span>
+      </h1>
+    </div>
+    <div class="fi-toolbar-right">
+      <button class="fi-btn fi-btn-outline" (click)="cancel()">
+        <i class="ti ti-arrow-left" aria-hidden="true"></i> Back
+      </button>
+      <button class="fi-btn fi-btn-success" *ngIf="statusCheck === 'Add'" (click)="save()">
+        <i class="ti ti-check" aria-hidden="true"></i> Save
+      </button>
+      <button class="fi-btn fi-btn-primary" *ngIf="statusCheck === 'Edit'" (click)="save()">
+        <i class="ti ti-pencil" aria-hidden="true"></i> Update
+      </button>
+    </div>
+  </div>
+
+  <!-- ── Header fields ───────────────────────────────────── -->
+  <div class="fi-card fi-card-overflow fi-mb">
+    <div class="fi-card-header">
+      <span class="fi-card-title">
+        <i class="ti ti-clipboard-text" aria-hidden="true"></i> Style information
+      </span>
+    </div>
+    <div class="fi-card-body">
+      <div class="fi-grid-4" style="align-items:end">
+
+        <div class="fi-field">
+          <label class="fi-field-label">Customer <span class="fi-required">*</span></label>
+          <ng-select style="font-size:13px" [(ngModel)]="data.customerId"
+            name="customerId" (change)="GetArticlesList()" placeholder="Select customer">
+            <ng-option *ngFor="let c of customers" [value]="c.id">
+              ({{ c.abbreviation }}) {{ c.name }}
+            </ng-option>
+          </ng-select>
+        </div>
+
+        <div class="fi-field">
+          <label class="fi-field-label">Article <span class="fi-required">*</span></label>
+          <ng-select style="font-size:13px" [(ngModel)]="data.articleId"
+            name="articleId" (change)="GetStylesList()" placeholder="Select article">
+            <ng-option *ngFor="let a of articles" [value]="a.id">{{ a.articleName }}</ng-option>
+          </ng-select>
+        </div>
+
+        <div class="fi-field">
+          <label class="fi-field-label">Style <span class="fi-required">*</span></label>
+          <ng-select style="font-size:13px" [(ngModel)]="data.styleId"
+            name="styleId" placeholder="Select style">
+            <ng-option *ngFor="let s of styles" [value]="s.id">{{ s.customerStyle }}</ng-option>
+          </ng-select>
+        </div>
+
+        <div class="fi-field">
+          <label class="fi-field-label">Version # <span class="fi-required">*</span></label>
+          <input class="fi-form-input" type="text" placeholder="e.g. v1, v2…"
+            name="versionNo" [(ngModel)]="data.versionNo" />
+        </div>
+
+        <div class="fi-field">
+          <label class="fi-field-label">Effective From <span class="fi-required">*</span></label>
+          <input class="fi-form-input" type="date"
+            name="effectiveFrom" [(ngModel)]="data.effectiveFrom" />
+        </div>
+
+        <!-- Grand totals + Add Section -->
+        <div style="grid-column:span 3;display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <ng-container *ngIf="sections.length">
+            <div class="sb-total-chip">
+              <div class="sb-total-label">Total SAM</div>
+              <div class="sb-total-val" style="color:var(--fi-accent)">
+                {{ getGrandTotalSAM() | number:'1.2-2' }}
+              </div>
+            </div>
+            <div class="sb-total-chip">
+              <div class="sb-total-label">Total Rate</div>
+              <div class="sb-total-val" style="color:#16a34a">
+                {{ getGrandTotalRate() | number:'1.2-2' }}
+              </div>
+            </div>
+            <div class="sb-total-chip">
+              <div class="sb-total-label">Total Cost</div>
+              <div class="sb-total-val" style="color:#d97706">
+                {{ getGrandTotalCost() | number:'1.2-2' }}
+              </div>
+            </div>
+            <div class="sb-total-chip">
+              <div class="sb-total-label">Operations</div>
+              <div class="sb-total-val">{{ getTotalOps() }}</div>
+            </div>
+          </ng-container>
+          <button class="fi-btn fi-btn-primary" (click)="addSection()">
+            <i class="ti ti-plus" aria-hidden="true"></i> Add Section
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Sections ────────────────────────────────────────── -->
+  <div *ngFor="let sec of sections; let si = index" class="fi-card fi-mb">
+
+    <div class="fi-card-header">
+      <div style="display:flex;align-items:center;gap:12px;flex:1;flex-wrap:wrap">
+        <div style="min-width:220px;max-width:280px">
+          <ng-select style="font-size:13px" [(ngModel)]="sec.sectionId"
+            [name]="'sectionId_'+si" placeholder="Select section"
+            (change)="onSectionChange(sec)">
+            <ng-option *ngFor="let s of sectionsMaster" [value]="s.id">{{ s.name }}</ng-option>
+          </ng-select>
+        </div>
+        <span class="fi-badge fi-badge-blue">{{ sec.operations.length }} ops</span>
+        <div style="display:flex;gap:14px;font-size:12px;color:var(--fi-text-secondary)"
+          *ngIf="sec.operations.length">
+          <span>SAM <strong style="color:var(--fi-accent)">{{ getSectionSAM(sec) | number:'1.2-2' }}</strong></span>
+          <span>Rate <strong style="color:#16a34a">{{ getSectionRate(sec) | number:'1.2-2' }}</strong></span>
+          <span>Cost <strong style="color:#d97706">{{ getSectionCost(sec) | number:'1.2-2' }}</strong></span>
+        </div>
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="fi-btn fi-btn-outline fi-btn-sm" (click)="addRow(sec)">
+          <i class="ti ti-plus" aria-hidden="true"></i> Add Row
+        </button>
+        <button class="fi-icon-btn fi-icon-btn-sm"
+          (click)="sec.isCollapsed = !sec.isCollapsed" aria-label="Toggle">
+          <i class="ti" aria-hidden="true"
+            [class.ti-chevron-down]="sec.isCollapsed"
+            [class.ti-chevron-up]="!sec.isCollapsed"></i>
+        </button>
+        <button class="fi-icon-btn fi-icon-btn-sm fi-icon-btn-danger"
+          (click)="removeSection(si)" aria-label="Remove section">
+          <i class="ti ti-trash" aria-hidden="true"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="fi-table-wrap" *ngIf="!sec.isCollapsed">
+      <table class="fi-table fi-table-dense">
+        <thead>
+          <tr>
+            <th style="width:36px">#</th>
+            <th style="min-width:280px">Operation</th>
+            <th style="min-width:140px">Machine</th>
+            <th class="center fi-th-blue"  style="width:78px">M/C SMV</th>
+            <th class="center fi-th-blue"  style="width:78px">Non M/C</th>
+            <th class="center fi-th-blue"  style="width:78px">Total SAM</th>
+            <th class="center fi-th-green" style="width:78px">Rate</th>
+            <th class="center fi-th-amber" style="width:78px">Cost</th>
+            <th class="center"             style="width:60px">Seq</th>
+            <th class="center fi-th-purple" style="width:70px">M/Cs</th>
+            <th class="center fi-th-purple" style="width:70px">Heads</th>
+            <th class="center"             style="width:78px">Cap @85%</th>
+            <th style="width:40px"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of sec.operations; let i = index">
+
+            <td class="center fi-cell-muted">{{ i + 1 }}</td>
+
+            <td>
+              <ng-select style="font-size:12px"
+                [(ngModel)]="row.operationId" [name]="'op_'+si+'_'+i">
+                <ng-option *ngFor="let op of sec.filteredOperations" [value]="op.id">
+                  {{ op.name }}
+                </ng-option>
+              </ng-select>
+            </td>
+
+            <td>
+              <ng-select style="font-size:12px"
+                [(ngModel)]="row.machineId" [name]="'mc_'+si+'_'+i">
+                <ng-option *ngFor="let m of machines" [value]="m.id">{{ m.name }}</ng-option>
+              </ng-select>
+            </td>
+
+            <td class="fi-bg-blue">
+              <input class="fi-cell-input fi-text-blue fi-fw-600" type="number"
+                [(ngModel)]="row.mcSam" (ngModelChange)="calcRow(row)"
+                [name]="'mcSam_'+si+'_'+i" min="0" step="0.001" placeholder="0" />
+            </td>
+
+            <td class="fi-bg-blue">
+              <input class="fi-cell-input fi-text-blue" type="number"
+                [(ngModel)]="row.nonMcSam" (ngModelChange)="calcRow(row)"
+                [name]="'nonMcSam_'+si+'_'+i" min="0" step="0.001" placeholder="0" />
+            </td>
+
+            <td class="center fi-bg-blue">
+              <span class="fi-fw-600 fi-text-blue">{{ row.sam | number:'1.3-3' }}</span>
+            </td>
+
+            <td class="fi-bg-green">
+              <input class="fi-cell-input fi-text-green fi-fw-600" type="number"
+                [(ngModel)]="row.rate" (ngModelChange)="calcRow(row)"
+                [name]="'rate_'+si+'_'+i" min="0" step="0.01" placeholder="0" />
+            </td>
+
+            <td class="center fi-bg-amber">
+              <span class="fi-fw-600 fi-text-amber">{{ row.cost | number:'1.2-2' }}</span>
+            </td>
+
+            <td>
+              <input class="fi-cell-input" type="number"
+                [(ngModel)]="row.sequenceNo" [name]="'seq_'+si+'_'+i" min="1" />
+            </td>
+
+            <td class="fi-bg-purple">
+              <input class="fi-cell-input fi-text-purple fi-fw-600" type="number"
+                [(ngModel)]="row.machinesRequired"
+                [name]="'mreq_'+si+'_'+i" min="0" placeholder="0" />
+            </td>
+
+            <td class="fi-bg-purple">
+              <input class="fi-cell-input fi-text-purple" type="number"
+                [(ngModel)]="row.headsAllocated"
+                [name]="'heads_'+si+'_'+i" min="0" placeholder="0" />
+            </td>
+
+            <td class="center fi-cell-muted" style="font-size:11px">
+              {{ getCapacity(row) | number:'1.0-0' }}
+            </td>
+
+            <td class="center">
+              <button class="fi-icon-btn fi-icon-btn-sm fi-icon-btn-danger"
+                (click)="removeRow(sec, i)" aria-label="Remove">
+                <i class="ti ti-trash" aria-hidden="true"></i>
+              </button>
+            </td>
+          </tr>
+
+          <tr *ngIf="sec.operations.length === 0">
+            <td colspan="13" class="fi-table-empty">
+              <i class="ti ti-plus-circle" aria-hidden="true"></i>
+              No operations — click "+ Add Row"
+            </td>
+          </tr>
+        </tbody>
+
+        <tfoot *ngIf="sec.operations.length > 0">
+          <tr style="background:var(--fi-bg);font-weight:600;font-size:12px">
+            <td colspan="3" style="padding-left:12px" class="fi-cell-muted fi-text-sm">
+              Section totals
+            </td>
+            <td colspan="2" class="center fi-bg-blue fi-text-blue fi-fw-600"></td>
+            <td class="center fi-bg-blue fi-text-blue fi-fw-600">
+              {{ getSectionSAM(sec) | number:'1.3-3' }}
+            </td>
+            <td class="center fi-bg-green fi-text-green fi-fw-600">
+              {{ getSectionRate(sec) | number:'1.2-2' }}
+            </td>
+            <td class="center fi-bg-amber fi-text-amber fi-fw-600">
+              {{ getSectionCost(sec) | number:'1.2-2' }}
+            </td>
+            <td></td>
+            <td class="center fi-bg-purple fi-text-purple fi-fw-600">
+              {{ getSectionMachines(sec) }}
+            </td>
+            <td class="center fi-bg-purple fi-text-purple fi-fw-600">
+              {{ getSectionHeads(sec) }}
+            </td>
+            <td></td>
+            <td></td>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </div>
+
+  <!-- Empty state -->
+  <div class="fi-card" *ngIf="sections.length === 0">
+    <div class="fi-table-empty">
+      <i class="ti ti-layout-list" aria-hidden="true"></i>
+      No sections yet — fill in style info above then click "+ Add Section"
+    </div>
+  </div>
+
+  <div style="height:20px"></div>
+</div>

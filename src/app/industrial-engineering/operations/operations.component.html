@@ -1,0 +1,78 @@
+<div class="fi-page">
+
+  <div class="fi-toolbar">
+    <div class="fi-search-wrap">
+      <i class="ti ti-search fi-search-icon" aria-hidden="true"></i>
+      <input class="fi-search" type="text" placeholder="Search operations…"
+        (input)="onFilterField($any($event.target).value)" />
+    </div>
+    <div class="fi-toolbar-right">
+      <button class="fi-btn fi-btn-outline" (click)="get()">
+        <i class="ti ti-refresh" aria-hidden="true"></i> Refresh
+      </button>
+      <button *ngIf="canAdd$ | async" class="fi-btn fi-btn-primary" (click)="add()">
+        <i class="ti ti-plus" aria-hidden="true"></i> Add Operation
+      </button>
+    </div>
+  </div>
+
+  <div class="fi-card">
+    <div class="fi-loading" *ngIf="loadingIndicator">
+      <span class="fi-spinner" aria-hidden="true"></span> Loading…
+    </div>
+
+    <div class="fi-table-wrap" *ngIf="!loadingIndicator">
+      <table class="fi-table">
+        <thead>
+          <tr>
+            <th style="width:56px">#</th>
+            <th style="width:100px">Code</th>
+            <th>Operation Name</th>
+            <th style="width:160px">Section</th>
+            <th style="width:120px">Status</th>
+            <th style="width:100px;text-align:right;padding-right:16px">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let row of gridView; let i = index">
+            <td class="fi-cell-muted">{{ i + 1 }}</td>
+            <td>
+              <span class="fi-badge fi-badge-gray">{{ row.code }}</span>
+            </td>
+            <td class="fi-cell-primary">{{ row.name }}</td>
+            <td class="fi-cell-muted">{{ row.sectionName }}</td>
+            <td>
+              <span class="fi-badge"
+                [ngClass]="row.active ? 'fi-badge-green' : 'fi-badge-gray'">
+                {{ row.active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td style="text-align:right;padding-right:16px">
+              <div style="display:flex;align-items:center;justify-content:flex-end;gap:6px">
+                <button class="fi-icon-btn fi-icon-btn-sm"
+                  (click)="edit(row)" aria-label="Edit">
+                  <i class="ti ti-pencil" aria-hidden="true"></i>
+                </button>
+                <button *ngIf="canDelete$ | async"
+                  class="fi-icon-btn fi-icon-btn-sm fi-icon-btn-danger"
+                  (click)="onDelete(row)" aria-label="Delete">
+                  <i class="ti ti-trash" aria-hidden="true"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+          <tr *ngIf="!gridView.length">
+            <td colspan="6" class="fi-table-empty">
+              <i class="ti ti-inbox" aria-hidden="true"></i>
+              No operations found
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="fi-table-footer" *ngIf="!loadingIndicator && gridView.length">
+      {{ gridView.length }} record{{ gridView.length === 1 ? '' : 's' }}
+    </div>
+  </div>
+</div>

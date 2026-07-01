@@ -1,0 +1,83 @@
+<div class="modal-body p-0">
+
+  <div class="card-header py-3 d-flex align-items-center justify-content-between"
+    style="background:var(--fi-accent)">
+    <h4 class="mb-0 fw-600" style="color:#fff;font-size:15px">
+      {{ statusCheck === 'Add' ? 'Add Operation' : 'Update Operation' }}
+    </h4>
+    <button class="fi-icon-btn"
+      style="border-color:rgba(255,255,255,.3);color:#fff;background:rgba(255,255,255,.1)"
+      (click)="activeModal.dismiss()" aria-label="Close">
+      <i class="ti ti-x" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <div class="card-body" style="position:relative;padding:20px">
+    <ngx-spinner bdColor="rgba(0,0,0,.7)" size="medium" color="#fff"
+      type="ball-scale-multiple" [fullScreen]="false">
+    </ngx-spinner>
+
+    <form #Form="ngForm" novalidate autocomplete="off">
+
+      <div class="fi-grid-2" style="margin-bottom:14px">
+
+        <div class="fi-field">
+          <label class="fi-field-label">Code <span class="fi-required">*</span></label>
+          <input class="fi-form-input" type="text"
+            name="code" #code="ngModel" [(ngModel)]="data.code"
+            readonly required />
+        </div>
+
+        <div class="fi-field">
+          <label class="fi-field-label">Section <span class="fi-required">*</span></label>
+          <ng-select style="font-size:13px"
+            placeholder="Select section"
+            [(ngModel)]="data.sectionId" name="sectionId" required>
+            <ng-option *ngFor="let s of sectionList" [value]="s.id">
+              {{ s.name }}
+            </ng-option>
+          </ng-select>
+        </div>
+
+      </div>
+
+      <div class="fi-field" style="margin-bottom:14px">
+        <label class="fi-field-label">
+          Operation Name <span class="fi-required">*</span>
+        </label>
+        <input class="fi-form-input" type="text"
+          placeholder="e.g. Right fly bottom tacking, Overlock Fly…"
+          name="name" #name="ngModel" [(ngModel)]="data.name" required
+          [class.error]="name.invalid && name.touched" />
+      </div>
+
+      <div style="display:flex;align-items:center;gap:8px">
+        <input type="checkbox" id="op-active" name="active"
+          [(ngModel)]="data.active" style="width:16px;height:16px;cursor:pointer" />
+        <label for="op-active"
+          style="font-size:13px;color:var(--fi-text-secondary);cursor:pointer;margin:0">
+          Active
+        </label>
+      </div>
+
+    </form>
+  </div>
+
+  <div class="modal-footer">
+    <button type="button" class="fi-btn fi-btn-outline"
+      (click)="activeModal.dismiss()">
+      Close
+    </button>
+    <button type="button" class="fi-btn fi-btn-success"
+      *ngIf="statusCheck === 'Add'"
+      [disabled]="Form.invalid" (click)="save()">
+      <i class="ti ti-check" aria-hidden="true"></i> Save
+    </button>
+    <button type="button" class="fi-btn fi-btn-primary"
+      *ngIf="statusCheck === 'Edit' && (canUpdate$ | async)"
+      [disabled]="Form.invalid" (click)="save()">
+      <i class="ti ti-pencil" aria-hidden="true"></i> Update
+    </button>
+  </div>
+
+</div>

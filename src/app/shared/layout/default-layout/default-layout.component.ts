@@ -85,6 +85,33 @@ tokeninfo:any
       ],
     },
 
+    // ── INDUSTRIAL ENGINEERING ───────────────────────────────────
+// ── INDUSTRIAL ENGINEERING ───────────────────────────────────
+{
+  label: 'Industrial Engineering',
+  permission: 'Industrial Engineering',
+  items: [
+    {
+      label: 'IE Setup',
+      icon: 'ti-settings-cog',
+      permission: 'Industrial Engineering',
+      children: [
+        { label: 'Sections',   route: '/industrial-engineering/sections',   permission: 'IE Sections'   },
+        { label: 'Operations', route: '/industrial-engineering/operations', permission: 'IE Operations' },
+        { label: 'Machines',   route: '/industrial-engineering/machines',   permission: 'IE Machines'   },
+        { label: 'Workers',    route: '/industrial-engineering/workers',    permission: 'IE Workers'    },
+      ],
+      expanded: false,
+    },
+    {
+      label: 'Style Bulletin',
+      icon: 'ti-file-description',
+      route: '/industrial-engineering/style-bulletin',
+      permission: 'IE Style Bulletin',
+    },
+  ],
+},
+
     // ── PRODUCTION FLOOR ─────────────────────────────────────────
     // {
     //   label: 'Production Floor',

@@ -241,50 +241,71 @@ calculateAll(): void {
   this.computeAutoBundleSize(); 
 }
 
-  addSection(): void {
+ addSection(): void {
   const name = prompt('Enter Section Name (e.g. TALL, LINING):');
   if (!name) return;
-
-  const colors = ['#ea580c', '#7c3aed', '#db2777', '#06b6d4'];
+ 
+  const colors = ['#ea580c', '#7c3aed', '#db2777', '#06b6d4', '#0891b2', '#16a34a'];
   const randomColor = colors[this.sections.length % colors.length];
-
- // ── ALWAYS sort by insertOrder ascending when building new section sizes ──
+ 
+  // ── Build sizes from sizeHeaders (always sorted by insertOrder) ──
   const sizeSource = (this.data.sizeHeaders?.length > 0
     ? this.data.sizeHeaders
     : this.sections[0]?.sizes || []
   )
     .slice()
-    .sort((a: any, b: any) => (a.insertOrder || 0) - (b.insertOrder || 0))  // ── ADD ──
-    .map((sz: any) => ({
-      name:            sz.sizeName || sz.name,
-      sizeId:          sz.sizeId,
-      insertOrder:     sz.insertOrder || 0,
-      poQty:           0,
-      cutQty:          0,
-      totalCalculated: 0,
-      diff:            0
-    }));
-
+    .sort((a: any, b: any) => (a.insertOrder || 0) - (b.insertOrder || 0));
+ 
   if (sizeSource.length === 0) {
     this.toastr.warning('Please select a job first to load sizes.', 'Warning');
     return;
   }
-
+ 
+  // ── Try to find matching BOM row for this section name ──
+  // Look in objBOMDetailMatrix for a row whose secName matches (case-insensitive)
+  const bomMatch = (this.data.objBOMDetailMatrix || []).find(
+    (row: any) => row.secName?.toLowerCase() === name.trim().toLowerCase()
+  );
+ 
+  // ── If no BOM row matches by name, use the FIRST BOM row as reference
+  // for poQty / cutQty so the summary table shows real values ──
+  const bomRef = bomMatch || (this.data.objBOMDetailMatrix?.[0]) || null;
+ 
+  const sizes = sizeSource.map((sz: any) => {
+    const sizeName = sz.sizeName || sz.name;
+ 
+    // Find matching size in the BOM reference row
+    const bomSize = bomRef?.sizes?.find(
+      (bs: any) => (bs.sizeName || bs.name) === sizeName || bs.sizeId === sz.sizeId
+    );
+ 
+    return {
+      name:            sizeName,
+      sizeId:          sz.sizeId,
+      insertOrder:     sz.insertOrder || 0,
+      // Inherit from BOM if found, otherwise 0 (user fills in lay matrix)
+      poQty: bomSize?.quantity ?? bomSize?.poQty ?? 0,
+      cutQty:(bomSize?.cutQty) ?? ((bomSize?.quantity || 0) + (bomSize?.additionalQuantity || 0)),
+      totalCalculated: 0,
+      diff:            0,
+    };
+  });
+ 
   const newSection: Section = {
-    id: 0,
-    tempKey: Date.now(),
-    name: name.toUpperCase(),
-    color: randomColor,
-      fabricId: null, 
-    sizes: sizeSource,
-    lays: [],
-    totalPoQty: 0,
-    totalCutQty: 0,
-    totalDiff: 0,
-    grandTotalPlies: 0,
-    grandTotalGarments: 0
+    id:                 0,
+    tempKey:            Date.now(),
+    name:               name.trim().toUpperCase(),
+    color:              randomColor,
+    fabricId:           null,
+    sizes,
+    lays:               [],
+    totalPoQty:         sizes.reduce((s:any, sz:any) => s + (sz.poQty  || 0), 0),
+    totalCutQty:        sizes.reduce((s:any, sz:any) => s + (sz.cutQty || 0), 0),
+    totalDiff:          0,
+    grandTotalPlies:    0,
+    grandTotalGarments: 0,
   };
-
+ 
   this.sections.push(newSection);
   this.selectSection(newSection);
 }
@@ -496,10 +517,38 @@ loadFabricOptions(jobId: number) {
       if (res.success) {
         this.data.fabricOptions = (res.data.objBOMFabric || []).map((f: any) => ({
           id: f.itemId,
-          label: `${f.itemCode || ''} - ${f.itemName || ''}`.trim()
+          label: `${f.itemCode || ''} - ${f.itemName || ''}`.trim(),
+          Cons:f.quantity,
         }));
       }
     });
+}
+getTotalMarkerAvg(): number {
+  return parseFloat(
+    (this.activeSection?.lays || [])
+      .reduce((sum: number, lay: any) => sum + (lay.markerAvg || 0), 0)
+      .toFixed(4)
+  );
+}
+
+getTotalMarkerLength(): number {
+  return parseFloat(
+    (this.activeSection?.lays || [])
+      .reduce((sum: number, lay: any) => sum + (lay.markerLength || 0), 0)
+      .toFixed(2)
+  );
+}
+
+getTotalMarkerWidth(): number {
+  return parseFloat(
+    (this.activeSection?.lays || [])
+      .reduce((sum: number, lay: any) => sum + (lay.markerWidth || 0), 0)
+      .toFixed(2)
+  );
+}
+getSelectedFabric(section: Section): any {
+  if (!section?.fabricId || !this.data.fabricOptions?.length) return null;
+  return this.data.fabricOptions.find((f: any) => f.id === Number(section.fabricId)) || null;
 }
     get totalQuantity() {
     return this.data.sizeBreakdown.reduce((sum:any, c:any) => sum + c.quantity, 0);

@@ -1,0 +1,25 @@
+/* ── Style Bulletin add/edit ─────────────────────────────── */
+.sb-total-chip {
+  background: var(--fi-bg);
+  border: 1px solid var(--fi-border);
+  border-radius: 8px;
+  padding: 8px 14px;
+  text-align: center;
+  min-width: 90px;
+}
+
+.sb-total-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--fi-text-muted);
+  margin-bottom: 2px;
+}
+
+.sb-total-val {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--fi-text-primary);
+  line-height: 1;
+}

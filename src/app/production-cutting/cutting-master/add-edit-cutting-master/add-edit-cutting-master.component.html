@@ -1,6 +1,5 @@
 <div class="fi-page">
-  <ngx-spinner bdColor="rgba(0,0,0,.7)" size="medium" color="#fff"
-    type="ball-scale-multiple" [fullScreen]="false">
+  <ngx-spinner bdColor="rgba(0,0,0,.7)" size="medium" color="#fff" type="ball-scale-multiple" [fullScreen]="false">
     <p style="color:#fff;font-size:13px">Loading...</p>
   </ngx-spinner>
 
@@ -14,8 +13,7 @@
 
         <div class="fi-field" style="flex:0 0 260px">
           <label class="fi-field-label">Job Number <span class="fi-required">*</span></label>
-          <ng-select style="font-size:13px" [(ngModel)]="data.jobId" name="jobId"
-            (change)="onJobChange()">
+          <ng-select style="font-size:13px" [(ngModel)]="data.jobId" name="jobId" (change)="onJobChange()">
             <ng-option *ngFor="let j of Jobs" [value]="j.jobId">{{ j.jobNumber }}</ng-option>
           </ng-select>
         </div>
@@ -71,15 +69,17 @@
               <td class="center fi-fw-600 fi-text-blue fi-bg-blue">{{ getSectionTotalDisplay(section,'quantity') }}</td>
             </tr>
             <tr>
-              <td [attr.colspan]="2+(data.sizeHeaders?.length||0)"
-                  class="fi-text-xs fi-cell-muted" style="padding:6px 12px;background:var(--fi-bg)">
+              <td [attr.colspan]="2+(data.sizeHeaders?.length||0)" class="fi-text-xs fi-cell-muted"
+                style="padding:6px 12px;background:var(--fi-bg)">
                 Extra Allowance — {{ data.extraPercentage || 0 }}%
               </td>
             </tr>
             <tr *ngFor="let section of data.objBOMDetailMatrix" class="fi-row-amber">
               <td class="fi-fw-600 fi-text-amber">{{ section.secName }}</td>
-              <td *ngFor="let sz of section.sizes" class="center fi-text-amber fi-fw-600">{{ sz.additionalQuantity || '' }}</td>
-              <td class="center fi-fw-600 fi-text-amber fi-bg-amber">{{ getSectionTotalDisplay(section,'additionalQuantity') }}</td>
+              <td *ngFor="let sz of section.sizes" class="center fi-text-amber fi-fw-600">{{ sz.additionalQuantity || ''
+                }}</td>
+              <td class="center fi-fw-600 fi-text-amber fi-bg-amber">{{
+                getSectionTotalDisplay(section,'additionalQuantity') }}</td>
             </tr>
             <tr>
               <td class="fi-th-dark fi-cell-primary fi-text-white">Total Cut</td>
@@ -134,17 +134,15 @@
         </div>
         <div class="fi-card-body" style="background:var(--fi-bg)">
           <div class="ae-section-list">
-            <div *ngFor="let s of sections"
-              class="ae-section-item"
+            <div *ngFor="let s of sections" class="ae-section-item"
               [class.ae-section-active]="s.id===activeSection?.id && s.tempKey===activeSection?.tempKey"
-              [style.border-left-color]="s.color"
-              (click)="selectSection(s)">
+              [style.border-left-color]="s.color" (click)="selectSection(s)">
               <div>
                 <div class="fi-fw-600" style="font-size:13px;color:var(--fi-text-primary)">{{ s.name }}</div>
                 <div class="fi-cell-muted fi-text-sm">Target PO: {{ s.totalPoQty | number }} pcs</div>
               </div>
-              <button class="fi-icon-btn fi-icon-btn-sm fi-icon-btn-danger"
-                (click)="deleteSection(s,$event)" aria-label="Delete section">
+              <button class="fi-icon-btn fi-icon-btn-sm fi-icon-btn-danger" (click)="deleteSection(s,$event)"
+                aria-label="Delete section">
                 <i class="ti ti-trash" aria-hidden="true"></i>
               </button>
             </div>
@@ -164,6 +162,7 @@
             <span class="fi-fw-600" style="font-size:14px" [style.color]="activeSection.color">
               {{ activeSection.name }} Production Sheet
             </span>
+
             <div style="display:flex;align-items:center;gap:8px;margin-left:8px">
               <label class="fi-field-label" style="margin:0">Fabric</label>
               <select class="fi-select" style="height:30px;width:260px;font-size:12.5px"
@@ -171,8 +170,29 @@
                 <option [value]="null">-- Select Fabric --</option>
                 <option *ngFor="let f of data.fabricOptions" [value]="f.id">{{ f.label }}</option>
               </select>
+
+              <!-- Cons label -->
+              <ng-container *ngIf="getSelectedFabric(activeSection) as fab">
+                <span style="display:flex;align-items:center;gap:4px;
+                     background:var(--fi-accent-light);
+                     border:1px solid var(--fi-accent);
+                     color:var(--fi-accent-text);
+                     border-radius:6px;
+                     padding:3px 10px;
+                     font-size:12px;
+                     font-weight:600;
+                     white-space:nowrap">
+                  <i class="ti ti-ruler-2" aria-hidden="true" style="font-size:13px"></i>
+                  Cons: {{ fab.Cons }} m
+                </span>
+              </ng-container>
+              <span *ngIf="!getSelectedFabric(activeSection)" class="fi-cell-muted"
+                style="font-size:12px;white-space:nowrap">
+                — select fabric to see consumption
+              </span>
             </div>
           </div>
+
           <button class="fi-btn fi-btn-outline fi-btn-sm" (click)="addLayRow()">
             <i class="ti ti-plus" aria-hidden="true"></i> Add Lay Line
           </button>
@@ -208,14 +228,11 @@
                 </tr>
                 <tr>
                   <td class="fi-cell-muted">Variance</td>
-                  <td *ngFor="let sz of activeSection.sizes" class="center fi-fw-600"
-                    [class.fi-text-red]="sz.diff<0"
-                    [class.fi-text-green]="sz.diff>0"
-                    [class.fi-cell-muted]="sz.diff===0">
+                  <td *ngFor="let sz of activeSection.sizes" class="center fi-fw-600" [class.fi-text-red]="sz.diff<0"
+                    [class.fi-text-green]="sz.diff>0" [class.fi-cell-muted]="sz.diff===0">
                     {{ sz.diff>0?'+'+sz.diff:sz.diff }}
                   </td>
-                  <td class="center fi-fw-600"
-                    [class.fi-text-red]="activeSection.totalDiff<0"
+                  <td class="center fi-fw-600" [class.fi-text-red]="activeSection.totalDiff<0"
                     [class.fi-text-green]="activeSection.totalDiff>=0">
                     {{ activeSection.totalDiff }}
                   </td>
@@ -225,7 +242,7 @@
           </div>
 
           <div class="fi-text-xs fi-cell-muted fi-fw-600 fi-mb-sm"
-               style="text-transform:uppercase;letter-spacing:.06em">
+            style="text-transform:uppercase;letter-spacing:.06em">
             Lay Matrix Entries
           </div>
 
@@ -235,18 +252,18 @@
               <thead>
                 <tr>
                   <th class="fi-th-purple center" style="width:80px">Req Fabric</th>
-                  <th class="fi-th-amber center"  style="width:75px">Mkr Avg</th>
+                  <th class="fi-th-amber center" style="width:75px">Mkr Avg</th>
                   <th class="center" style="width:80px">Shrinkage</th>
                   <th class="center" style="width:75px">Marker</th>
-                  <th class="fi-th-amber center"  style="width:85px">Mkr Length</th>
-                  <th class="fi-th-amber center"  style="width:75px">Mkr Width</th>
+                  <th class="fi-th-amber center" style="width:85px">Mkr Length</th>
+                  <th class="fi-th-amber center" style="width:75px">Mkr Width</th>
                   <th class="center" style="width:75px">Status</th>
-                  <th class="fi-th-blue center"   style="width:85px">Plies</th>
-                  <th class="fi-th-amber center"  style="width:70px">Diff</th>
+                  <th class="fi-th-blue center" style="width:85px">Plies</th>
+                  <th class="fi-th-amber center" style="width:70px">Diff</th>
                   <th *ngFor="let sz of activeSection.sizes" class="center" style="min-width:54px">
                     {{ sz.name }} Ratio
                   </th>
-                  <th class="fi-th-green center"  style="width:90px">Total Pcs</th>
+                  <th class="fi-th-green center" style="width:90px">Total Pcs</th>
                   <th style="width:40px"></th>
                 </tr>
               </thead>
@@ -257,9 +274,8 @@
                     <span class="fi-fw-600 fi-text-purple">{{ lay.reqFabric || 0 }}</span>
                   </td>
                   <td class="fi-bg-amber">
-                    <input class="fi-cell-input" type="number"
-                      [(ngModel)]="lay.markerAvg" (ngModelChange)="calculateAll()"
-                      min="0" step="0.01" />
+                    <input class="fi-cell-input" type="number" [(ngModel)]="lay.markerAvg"
+                      (ngModelChange)="calculateAll()" min="0" step="0.01" />
                   </td>
                   <td>
                     <input class="fi-cell-input" type="text" [(ngModel)]="lay.shrinkage" />
@@ -268,39 +284,36 @@
                     <span class="fi-badge fi-badge-amber">{{ lay.markerName }}</span>
                   </td>
                   <td class="fi-bg-amber">
-                    <input class="fi-cell-input" type="number"
-                      [(ngModel)]="lay.markerLength" (ngModelChange)="calculateAll()" min="0" />
+                    <input class="fi-cell-input" type="number" [(ngModel)]="lay.markerLength"
+                      (ngModelChange)="calculateAll()" min="0" />
                   </td>
                   <td class="fi-bg-amber">
-                    <input class="fi-cell-input" type="number"
-                      [(ngModel)]="lay.markerWidth" (ngModelChange)="calculateAll()"
-                      min="0" step="0.01" />
+                    <input class="fi-cell-input" type="number" [(ngModel)]="lay.markerWidth"
+                      (ngModelChange)="calculateAll()" min="0" step="0.01" />
                   </td>
                   <td>
                     <input class="fi-cell-input" type="text" [(ngModel)]="lay.status" />
                   </td>
                   <td class="fi-bg-blue">
-                    <input class="fi-cell-input fi-fw-600 fi-text-blue" type="number"
-                      [(ngModel)]="lay.plies" (ngModelChange)="calculateAll()" min="0" />
+                    <input class="fi-cell-input fi-fw-600 fi-text-blue" type="number" [(ngModel)]="lay.plies"
+                      (ngModelChange)="calculateAll()" min="0" />
                   </td>
                   <td class="center fi-bg-amber">
-                    <span class="fi-fw-600"
-                      [class.fi-text-red]="lay.markerDiff<0"
+                    <span class="fi-fw-600" [class.fi-text-red]="lay.markerDiff<0"
                       [class.fi-text-green]="lay.markerDiff>=0">
                       {{ lay.markerDiff>0?'+'+lay.markerDiff:lay.markerDiff }}
                     </span>
                   </td>
                   <td *ngFor="let sz of activeSection.sizes">
-                    <input class="fi-cell-input" type="number"
-                      [(ngModel)]="lay.breakdown[sz.name]"
+                    <input class="fi-cell-input" type="number" [(ngModel)]="lay.breakdown[sz.name]"
                       (ngModelChange)="calculateAll()" min="0" placeholder="0" />
                   </td>
                   <td class="center fi-bg-green">
                     <span class="fi-fw-600 fi-text-green">{{ lay.totalPcs | number }}</span>
                   </td>
                   <td class="center">
-                    <button class="fi-icon-btn fi-icon-btn-sm fi-icon-btn-danger"
-                      (click)="deleteLayRow(idx)" aria-label="Delete lay">
+                    <button class="fi-icon-btn fi-icon-btn-sm fi-icon-btn-danger" (click)="deleteLayRow(idx)"
+                      aria-label="Delete lay">
                       <i class="ti ti-trash" aria-hidden="true"></i>
                     </button>
                   </td>
@@ -318,28 +331,35 @@
               <tfoot *ngIf="activeSection.lays.length>0">
                 <tr style="background:var(--fi-bg);font-weight:600;font-size:12px">
                   <td class="center fi-bg-purple fi-fw-600 fi-text-purple">{{ getTotalReqFabric() }}</td>
-                  <td colspan="2" style="padding-left:10px" class="fi-cell-muted fi-text-sm">Total Summations</td>
+                  <td class="center fi-bg-amber fi-fw-600 fi-text-amber">{{ getTotalMarkerAvg() }}</td>
+                  <td class="fi-cell-muted fi-text-sm" style="padding-left:10px">Total Summations</td>
                   <td class="fi-bg-amber"></td>
-                  <td class="fi-bg-amber"></td>
-                  <td class="fi-bg-amber"></td>
+                  <td class="center fi-bg-amber fi-fw-600 fi-text-amber">{{ getTotalMarkerLength() }}</td>
+                  <td class="center fi-bg-amber fi-fw-600 fi-text-amber">{{ getTotalMarkerWidth() }}</td>
                   <td></td>
                   <td class="center fi-bg-blue fi-fw-600 fi-text-blue">{{ activeSection.grandTotalPlies | number }}</td>
                   <td></td>
-                  <td *ngFor="let sz of activeSection.sizes" class="center fi-fw-600">{{ sz.totalCalculated | number }}</td>
-                  <td class="center fi-bg-green fi-fw-600 fi-text-green">{{ activeSection.grandTotalGarments | number }}</td>
+                  <td *ngFor="let sz of activeSection.sizes" class="center fi-fw-600">{{ sz.totalCalculated | number }}
+                  </td>
+                  <td class="center fi-bg-green fi-fw-600 fi-text-green">{{ activeSection.grandTotalGarments | number }}
+                  </td>
                   <td></td>
                 </tr>
                 <tr style="background:#fafafa;font-size:11.5px">
                   <td></td>
-                  <td colspan="2" style="padding-left:10px" class="fi-cell-muted fi-text-xs fi-fw-600">Achievement %</td>
-                  <td></td><td></td><td></td><td></td><td></td><td></td>
+                  <td colspan="2" style="padding-left:10px" class="fi-cell-muted fi-text-xs fi-fw-600">Achievement %
+                  </td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
+                  <td></td>
                   <td *ngFor="let sz of activeSection.sizes" class="center fi-fw-600"
-                    [class.fi-text-green]="getAchievementPct(sz)>=100"
-                    [class.fi-text-red]="getAchievementPct(sz)<100">
+                    [class.fi-text-green]="getAchievementPct(sz)>=100" [class.fi-text-red]="getAchievementPct(sz)<100">
                     {{ getAchievementPct(sz) }}%
                   </td>
-                  <td class="center fi-fw-600"
-                    [class.fi-text-green]="getOverallAchievementPct()>=100"
+                  <td class="center fi-fw-600" [class.fi-text-green]="getOverallAchievementPct()>=100"
                     [class.fi-text-red]="getOverallAchievementPct()<100">
                     {{ getOverallAchievementPct() }}%
                   </td>

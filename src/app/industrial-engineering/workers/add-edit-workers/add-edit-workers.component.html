@@ -1,0 +1,88 @@
+<div class="card-header py-3 d-flex align-items-center justify-content-between"
+  style="background:var(--fi-accent)">
+  <h4 class="mb-0" style="color:#fff;font-size:15px;font-weight:600">
+    {{ statusCheck === 'Add' ? 'Add Worker' : 'Update Worker' }}
+  </h4>
+  <button class="fi-icon-btn"
+    style="border-color:rgba(255,255,255,.3);color:#fff;background:rgba(255,255,255,.1)"
+    (click)="activeModal.dismiss()" aria-label="Close">
+    <i class="ti ti-x" aria-hidden="true"></i>
+  </button>
+</div>
+
+<div class="card-body" style="position:relative;padding:20px">
+  <ngx-spinner bdColor="rgba(0,0,0,.7)" size="medium" color="#fff"
+    type="ball-scale-multiple" [fullScreen]="false">
+  </ngx-spinner>
+
+  <form #Form="ngForm" novalidate autocomplete="off">
+
+    <div class="fi-grid-2" style="margin-bottom:14px">
+
+      <div class="fi-field">
+        <label class="fi-field-label">Code <span class="fi-required">*</span></label>
+        <input class="fi-form-input" type="text"
+          name="code" [(ngModel)]="data.code" readonly required />
+      </div>
+
+      <div class="fi-field">
+        <label class="fi-field-label">Skill Level</label>
+        <input class="fi-form-input" type="text"
+          placeholder="e.g. Junior, Senior, Master…"
+          name="skillLevel" [(ngModel)]="data.skillLevel" />
+      </div>
+
+    </div>
+
+    <div class="fi-field" style="margin-bottom:14px">
+      <label class="fi-field-label">
+        Full Name <span class="fi-required">*</span>
+      </label>
+      <input class="fi-form-input" type="text"
+        placeholder="Worker full name"
+        name="name" #name="ngModel" [(ngModel)]="data.name" required
+        [class.error]="name.invalid && name.touched" />
+    </div>
+
+    <div class="fi-field" style="margin-bottom:14px">
+      <label class="fi-field-label">CNIC</label>
+      <input class="fi-form-input" type="text"
+        placeholder="00000-0000000-0"
+        name="cnic" [(ngModel)]="data.cnic"
+        maxlength="15"
+        (input)="onCnicInput($event)"
+        [class.error]="data.cnic && !isValidCnic()" />
+      <span style="font-size:11px;color:#dc2626;margin-top:3px;display:block"
+        *ngIf="data.cnic && !isValidCnic()">
+        Format: 00000-0000000-0
+      </span>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px">
+      <input type="checkbox" id="wk-active" name="active"
+        [(ngModel)]="data.active" style="width:16px;height:16px;cursor:pointer" />
+      <label for="wk-active"
+        style="font-size:13px;color:var(--fi-text-secondary);cursor:pointer;margin:0">
+        Active
+      </label>
+    </div>
+
+  </form>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="fi-btn fi-btn-outline"
+    (click)="activeModal.dismiss()">
+    Close
+  </button>
+  <button type="button" class="fi-btn fi-btn-success"
+    *ngIf="statusCheck === 'Add'"
+    [disabled]="Form.invalid" (click)="save()">
+    <i class="ti ti-check" aria-hidden="true"></i> Save
+  </button>
+  <button type="button" class="fi-btn fi-btn-primary"
+    *ngIf="statusCheck === 'Edit' && (canUpdate$ | async)"
+    [disabled]="Form.invalid" (click)="save()">
+    <i class="ti ti-pencil" aria-hidden="true"></i> Update
+  </button>
+</div>

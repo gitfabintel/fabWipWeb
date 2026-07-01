@@ -739,3 +739,81 @@ html, body {
 .fi-card-overflow {
   overflow: visible !important;
 }
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   NGBOOTSTRAP MODAL — fi-modal class
+   Ensures modals always render centered over the full screen
+   ═══════════════════════════════════════════════════════════ */
+.fi-modal .modal-content {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+ 
+.fi-modal .modal-dialog {
+  display: flex;
+  align-items: center;
+  min-height: calc(100% - 3.5rem);
+}
+.modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 104vw !important;
+  height: 104vh !important;
+  background-color: #494949;
+  z-index: 1000 !important;
+}
+ 
+.modal-backdrop.show {
+  opacity: .2;
+}
+ 
+/* ── NgBootstrap modal centering fix ────────────────────────
+   container:'body' moves the modal to <body> but NgBootstrap
+   still needs these overrides to center it properly.        */
+ngb-modal-backdrop {
+  z-index: 1050 !important;
+}
+ 
+ngb-modal-window {
+  z-index: 1055 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  position: fixed !important;
+  inset: 0 !important;
+  overflow-y: auto !important;
+}
+ 
+ngb-modal-window .modal-dialog {
+  position: relative !important;
+  margin: auto !important;
+  max-height: 90vh !important;
+  pointer-events: auto !important;
+}
+ 
+ngb-modal-window .modal-content {
+  border: none !important;
+  box-shadow: none !important;
+}
+
+
+.modal-dialog.slide-from-left {
+  max-width: 500px;
+  margin: auto;
+}
+ 
+.modal-dialog.modal-lg.slide-from-left {
+  max-width: 800px;
+}
+ 
+.modal-dialog.modal-xl.slide-from-left {
+  max-width: 1140px;
+}
+ 
+.modal-dialog.modal-sm.slide-from-left {
+  max-width: 320px;
+}

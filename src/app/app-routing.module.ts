@@ -37,6 +37,11 @@ const routes: Routes = [
         loadChildren: () => import('./production-cutting/production-cutting.module').then(m => m.ProductionCuttingModule)
       },
 
+       {
+        path: 'industrial-engineering',
+        loadChildren: () => import('./industrial-engineering/industrial-engineering.module').then(m => m.IndustrialEngineeringModule)
+      },
+
     ]
   },
 
